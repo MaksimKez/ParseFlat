@@ -2,5 +2,5 @@ namespace Application.Common.Abstractions;
 
 public interface ITokenGenerator
 {
-    string GenerateToken();
+    string GenerateToken(int size = 32);
 }

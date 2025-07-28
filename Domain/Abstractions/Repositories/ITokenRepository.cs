@@ -2,8 +2,8 @@ namespace Domain.Abstractions.Repositories;
 
 public interface ITokenRepository<T> where T : TokenBase
 {
-    Task AddAsync(T token);
-    Task<T?> GetByIdAsync(Guid id);
-    Task<T?> FindByTokenAsync(string token);
-    Task RemoveAsync(T token);
+    Task AddAsync(T token, CancellationToken cancellationToken = default);
+    Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<T?> FindByTokenAsync(string token, CancellationToken cancellationToken = default);
+    Task RemoveAsync(T token, CancellationToken cancellationToken = default);
 }
