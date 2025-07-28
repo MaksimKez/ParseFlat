@@ -2,4 +2,4 @@ using MediatR;
 
 namespace Application.BusinessLogic.Auth.Commands.RegisterUser;
 
-public record RegisterUserCommand(string Email, string Password) : IRequest<Guid>;
+public record RegisterUserCommand(RegisterUserDto dto) : IRequest<Guid>;

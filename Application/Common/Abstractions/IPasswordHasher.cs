@@ -1,4 +1,4 @@
-namespace Application.BusinessLogic;
+namespace Application.Common.Abstractions;
 
 public interface IPasswordHasher
 {
