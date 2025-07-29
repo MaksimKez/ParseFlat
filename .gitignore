@@ -1,1 +1,4 @@
 /.idea/.idea.FlatParser/.idea/vcs.xml
+Application/obj
+Domain/obj
+Persistence/obj
