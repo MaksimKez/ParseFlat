@@ -4,15 +4,15 @@ namespace Domain.Abstractions.Repositories;
 
 public interface IUserRepository
 {
-    Task<User?> FindByIdAsync(Guid id);
+    Task<User?> FindByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
-    Task<User?> FindByEmailAsync(string email);
+    Task<User?> FindByEmailAsync(string email, CancellationToken cancellationToken = default);
 
-    Task AddAsync(User user);
+    Task AddAsync(User user, CancellationToken cancellationToken = default);
 
-    Task UpdateAsync(User user);
+    Task UpdateAsync(User user, CancellationToken cancellationToken = default);
 
-    Task DeleteAsync(Guid id);
+    Task DeleteAsync(Guid id, CancellationToken cancellationToken = default);
 
-    Task<IReadOnlyList<User>> ListAllAsync();
+    Task<IReadOnlyList<User>> ListAllAsync(int skip, int take, CancellationToken cancellationToken = default);
 }
