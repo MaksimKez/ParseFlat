@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Text;
 using Application.Abstractions.JWT;
 using Domain.Entities;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Infrastructure.JWT;
@@ -12,9 +13,9 @@ public class JwtGenerator : IJwtGenerator
     private readonly JwtOptions _jwtOptions;
     private readonly SymmetricSecurityKey _securityKey;
 
-    public JwtGenerator(JwtOptions jwtOptions)
+    public JwtGenerator(IOptions<JwtOptions> jwtOptions)
     {
-        _jwtOptions = jwtOptions;
+        _jwtOptions = jwtOptions.Value;
         _securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.SecretKey));
     }
 

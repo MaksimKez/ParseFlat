@@ -4,3 +4,9 @@ Domain/obj
 Persistence/obj
 Infrastructure/obj
 WebApi/obj
+.idea
+Application/bin
+Domain/bin
+Infrastructure/bin
+Persistence/bin
+WebApi/bin

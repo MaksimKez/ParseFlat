@@ -1,9 +1,31 @@
+using Application.DependencyInjection;
+using Infrastructure;
+using Infrastructure.JWT;
+using Persistence;
+
 var builder = WebApplication.CreateBuilder(args);
 
+//temporary
+builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(nameof(JwtOptions)));
 
+builder.Services.AddInfrastructure();
+builder.Services.AddPersistence(builder.Configuration);
+builder.Services.AddApplication();
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
+
+builder.Services.AddControllers();
+builder.Services.AddAuthentication();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Title = "My API",
+        Version = "v1"
+    });
+});
+
 
 var app = builder.Build();
 
