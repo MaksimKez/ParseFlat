@@ -1,15 +1,15 @@
 using System.Reflection;
+using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using Persistence.Entities;
 
 namespace Persistence;
 
 public class AuthDbContext : DbContext
 {
-    public DbSet<UserEntity> Users { get; set; }
-    public DbSet<EmailVerificationTokenEntity> EmailVerificationTokens { get; set; }
-    public DbSet<PasswordResetTokenEntity> PasswordResetToken { get; set; }
-    public DbSet<RefreshTokenEntity> RefreshTokens { get; set; }
+    public DbSet<User> Users { get; set; }
+    public DbSet<EmailVerificationToken> EmailVerificationTokens { get; set; }
+    public DbSet<PasswordResetToken> PasswordResetToken { get; set; }
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
     
     public AuthDbContext(DbContextOptions<AuthDbContext> options) : base(options) { }
     

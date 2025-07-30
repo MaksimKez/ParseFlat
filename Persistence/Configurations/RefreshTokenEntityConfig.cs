@@ -1,12 +1,12 @@
+using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Persistence.Entities;
 
 namespace Persistence.Configurations;
 
-public class RefreshTokenEntityConfig : IEntityTypeConfiguration<RefreshTokenEntity>
+public class RefreshTokenEntityConfig : IEntityTypeConfiguration<RefreshToken>
 {
-    public void Configure(EntityTypeBuilder<RefreshTokenEntity> builder)
+    public void Configure(EntityTypeBuilder<RefreshToken> builder)
     {
         builder.ToTable("RefreshTokens");
         

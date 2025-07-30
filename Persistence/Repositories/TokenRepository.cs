@@ -1,31 +1,29 @@
 using Domain.Abstractions;
 using Domain.Abstractions.Repositories;
+using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Persistence.Entities;
 
 namespace Persistence.Repositories;
 
-public class TokenRepository<TDomain, TEntity> : ITokenRepository<TDomain>
+public class TokenRepository<TDomain> : ITokenRepository<TDomain>
     where TDomain : TokenBase
-    where TEntity : TokenBaseEntity, new()
 {
     private readonly AuthDbContext _context;
-    private readonly DbSet<TEntity> _dbSet;
-    private readonly ILogger<TokenRepository<TDomain, TEntity>> _logger;
+    private readonly DbSet<TDomain> _dbSet;
+    private readonly ILogger<TokenRepository<TDomain>> _logger;
 
-    public TokenRepository(AuthDbContext context, ILogger<TokenRepository<TDomain, TEntity>> logger)
+    public TokenRepository(AuthDbContext context, ILogger<TokenRepository<TDomain>> logger)
     {
         _context = context;
         _logger = logger;
-        _dbSet = _context.Set<TEntity>();
+        _dbSet = _context.Set<TDomain>();
     }
 
     public async Task AddAsync(TDomain token, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Adding token: {TokenId}", token.Id);
-        var entity = MapToEntity(token);
-        await _dbSet.AddAsync(entity, cancellationToken);
+        await _dbSet.AddAsync(token, cancellationToken);
         _logger.LogInformation("Token added: {TokenId}", token.Id);
     }
 
@@ -40,7 +38,7 @@ public class TokenRepository<TDomain, TEntity> : ITokenRepository<TDomain>
         }
 
         _logger.LogInformation("Token found by ID: {TokenId}", id);
-        return MapToDomain(entity);
+        return entity;
     }
 
     public async Task<TDomain?> FindByTokenAsync(string token, CancellationToken cancellationToken = default)
@@ -54,26 +52,14 @@ public class TokenRepository<TDomain, TEntity> : ITokenRepository<TDomain>
         }
 
         _logger.LogInformation("Token found by token string.");
-        return MapToDomain(entity);
+        return entity;
     }
 
     public Task RemoveAsync(TDomain token, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Removing token: {TokenId}", token.Id);
-        var entity = MapToEntity(token);
-        _dbSet.Remove(entity);
+        _dbSet.Remove(token);
         _logger.LogInformation("Token removed: {TokenId}", token.Id);
         return Task.CompletedTask;
-    }
-
-    // todo automapper
-    protected virtual TDomain MapToDomain(TEntity entity)
-    {
-        throw new NotImplementedException("Provide mapping in derived class");
-    }
-
-    protected virtual TEntity MapToEntity(TDomain domain)
-    {
-        throw new NotImplementedException("Provide mapping in derived class");
     }
 }

@@ -10,4 +10,10 @@ public class User
     public string PasswordHash { get; set; }
 
     public bool IsVerified { get; set; }
+    public bool IsDeleted { get; set; }
+    
+    public ICollection<RefreshToken> RefreshTokens { get; set; }
+    public ICollection<PasswordResetToken> PasswordResetTokens { get; set; }
+    public ICollection<EmailVerificationToken> EmailVerificationTokens { get; set; }
+
 }

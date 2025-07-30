@@ -1,12 +1,12 @@
+using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Persistence.Entities;
 
 namespace Persistence.Configurations;
 
-public class UserEntityConfig : IEntityTypeConfiguration<UserEntity>
+public class UserEntityConfig : IEntityTypeConfiguration<User>
 {
-    public void Configure(EntityTypeBuilder<UserEntity> builder)
+    public void Configure(EntityTypeBuilder<User> builder)
     {
         builder.ToTable("Users");
         

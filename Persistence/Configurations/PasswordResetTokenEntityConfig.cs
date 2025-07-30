@@ -1,12 +1,12 @@
+using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Persistence.Entities;
 
 namespace Persistence.Configurations;
 
-public class PasswordResetTokenEntityConfig : IEntityTypeConfiguration<PasswordResetTokenEntity>
+public class PasswordResetTokenEntityConfig : IEntityTypeConfiguration<PasswordResetToken>
 {
-    public void Configure(EntityTypeBuilder<PasswordResetTokenEntity> builder)
+    public void Configure(EntityTypeBuilder<PasswordResetToken> builder)
     {
         builder.ToTable("PasswordResetTokens");
         

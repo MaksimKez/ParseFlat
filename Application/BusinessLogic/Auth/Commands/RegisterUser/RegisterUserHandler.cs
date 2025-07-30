@@ -50,6 +50,7 @@ public class RegisterUserHandler : IRequestHandler<RegisterUserCommand, Register
         }
         catch (Exception ex)
         {
+            //temporary
             throw;
             
             _logger.LogError(ex, "Error registering user {Email}", dto.Email);

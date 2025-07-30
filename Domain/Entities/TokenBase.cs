@@ -1,4 +1,4 @@
-namespace Domain.Abstractions;
+namespace Domain.Entities;
 
 public abstract class TokenBase
 {
@@ -9,6 +9,8 @@ public abstract class TokenBase
     
     public DateTime ExpiresAt { get; set; }
     public bool IsUsed { get; set; }
+
+    public User? User { get; set; }
     
     public void MarkAsUsed()
     {
