@@ -2,3 +2,5 @@
 Application/obj
 Domain/obj
 Persistence/obj
+Infrastructure/obj
+WebApi/obj

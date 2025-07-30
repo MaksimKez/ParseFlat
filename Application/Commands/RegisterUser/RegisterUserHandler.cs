@@ -1,13 +1,13 @@
 using Application.Abstractions.EmailService;
-using Application.Common.Abstractions;
+using Application.Abstractions.Security;
+using Application.Dtos.Users;
 using Application.Responses;
-using Application.Responses.Infrastructure;
 using Domain.Abstractions;
 using Domain.Entities;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
-namespace Application.BusinessLogic.Auth.Commands.RegisterUser;
+namespace Application.Commands.RegisterUser;
 
 public class RegisterUserHandler : IRequestHandler<RegisterUserCommand, RegisterUserResponse>
 {
@@ -58,7 +58,7 @@ public class RegisterUserHandler : IRequestHandler<RegisterUserCommand, Register
         }
     }
     
-    private User CreateUser(RegisterUserDto dto)
+    private User CreateUser(RegisterUserRequest dto)
     {
         var id = Guid.NewGuid();
         

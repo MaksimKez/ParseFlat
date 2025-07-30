@@ -1,6 +1,6 @@
 using Domain.Entities;
 
-namespace Application.Common.Abstractions;
+namespace Application.Abstractions.JWT;
 
 public interface IJwtGenerator
 {

@@ -1,6 +1,6 @@
-namespace Application.BusinessLogic.Auth.Commands.RegisterUser;
+namespace Application.Dtos.Users;
 
-public class RegisterUserDto
+public class RegisterUserRequest
 {
     public string Email { get; set; }
     public string Password { get; set; }

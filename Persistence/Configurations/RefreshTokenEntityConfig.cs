@@ -19,9 +19,6 @@ public class RefreshTokenEntityConfig : IEntityTypeConfiguration<RefreshToken>
         builder.Property(t => t.ExpiresAt)
             .IsRequired();
 
-        builder.Property(t => t.IsUsed)
-            .IsRequired();
-
         builder.HasOne(t => t.User)
             .WithMany()
             .HasForeignKey(t => t.UserId)

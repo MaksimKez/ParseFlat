@@ -1,6 +1,6 @@
-using Application.Common.Abstractions;
+using Application.Abstractions.Security;
 
-namespace Application.Common.Implementation;
+namespace Infrastructure.Security;
 
 public class PasswordHasher : IPasswordHasher
 {

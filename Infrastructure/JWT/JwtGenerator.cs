@@ -1,11 +1,11 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Application.Common.Abstractions;
+using Application.Abstractions.JWT;
 using Domain.Entities;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Application.Common.Implementation;
+namespace Infrastructure.JWT;
 
 public class JwtGenerator : IJwtGenerator
 {

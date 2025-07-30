@@ -1,4 +1,4 @@
-namespace Application.Common.Abstractions;
+namespace Application.Abstractions.Security;
 
 public interface ITokenGenerator
 {

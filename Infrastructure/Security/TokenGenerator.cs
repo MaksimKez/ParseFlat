@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
-using Application.Common.Abstractions;
+using Application.Abstractions.Security;
 
-namespace Application.Common.Implementation;
+namespace Infrastructure.Security;
 
 public class TokenGenerator : ITokenGenerator
 {
