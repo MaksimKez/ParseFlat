@@ -16,6 +16,7 @@ public static class InfrastructureDependencyInjection
     {
 
         services.AddTransient<IEmailBuilder, EmailBuilder>();
+        services.AddScoped<IEmailSender, EmailSender>();
         
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IJwtGenerator, JwtGenerator>();
