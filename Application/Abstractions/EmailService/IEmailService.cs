@@ -4,6 +4,6 @@ namespace Application.Abstractions.EmailService;
 
 public interface IEmailService
 {
-    Task<EmailServiceResponse> SendEmailAsync(string toEmail,
+    Task<EmailServiceResult> SendEmailAsync(string toEmail,
         string toName, string token, CancellationToken cancellationToken = default);
 }

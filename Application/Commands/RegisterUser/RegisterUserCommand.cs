@@ -4,4 +4,4 @@ using MediatR;
 
 namespace Application.Commands.RegisterUser;
 
-public record RegisterUserCommand(RegisterUserRequest Dto) : IRequest<RegisterUserResponse>;
+public record RegisterUserCommand(RegisterUserRequest Dto) : IRequest<RegisterUserResult>;

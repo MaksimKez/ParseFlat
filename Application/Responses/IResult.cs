@@ -1,6 +1,6 @@
 namespace Application.Responses;
 
-public interface IResponse
+public interface IResult
 {
     bool IsSuccess { get; }
     string? ErrorMessage { get; }

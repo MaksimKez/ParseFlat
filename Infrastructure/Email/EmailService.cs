@@ -6,14 +6,14 @@ namespace Infrastructure.Email;
 
 public class EmailService(ILogger<EmailService> logger) : IEmailService
 {
-    public async Task<EmailServiceResponse> SendEmailAsync(string toEmail, string toName, string token,
+    public async Task<EmailServiceResult> SendEmailAsync(string toEmail, string toName, string token,
         CancellationToken cancellationToken = default)
     {
         logger.LogInformation($"Sending email to {toEmail} with token {token}");
 
         //temp
         await Task.Delay(300, cancellationToken);
-        return new EmailServiceResponse
+        return new EmailServiceResult
         {
             ErrorMessage = null,
             IsSuccess = true,

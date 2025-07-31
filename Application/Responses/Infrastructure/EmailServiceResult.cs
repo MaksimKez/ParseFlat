@@ -1,6 +1,6 @@
 namespace Application.Responses.Infrastructure;
 
-public class EmailServiceResponse : IResponse
+public class EmailServiceResult : IResult
 {
     public bool IsSuccess { get; init; }
     public string? ErrorMessage { get; init; }
