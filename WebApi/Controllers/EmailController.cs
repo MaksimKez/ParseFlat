@@ -8,6 +8,8 @@ namespace WebApi.Controllers;
 public class EmailController(IMediator mediator) : ControllerBase
 {
     [HttpPost("SendVerificationEmail")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> SendVerificationEmail([FromBody] SendVerificationEmailRequest request)
     {//fluentvalidation ll be added later 
         var result = await mediator.Send(new SendVerificationEmailCommand(request));

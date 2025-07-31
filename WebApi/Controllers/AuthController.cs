@@ -9,12 +9,15 @@ namespace WebApi.Controllers;
 public class AuthController(IMediator mediator) : ControllerBase
 {
     [HttpPost("register")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> RegisterUser([FromBody] RegisterUserRequest registerUserRequest)
     {
         var result = await mediator.Send(new RegisterUserCommand(registerUserRequest));
         
         return result.IsSuccess
-            ? Ok(new { message = "User registration successful." })
+                                //todo change to get when added
+            ? CreatedAtAction("RegisterUser", new {id = result.RegisteredUserId})
             : BadRequest(new { error = result.ErrorMessage });
 
     }
