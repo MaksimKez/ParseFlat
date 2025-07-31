@@ -11,4 +11,16 @@ public class EmailVerificationToken : TokenBase
         if (IsUsed) throw new InvalidOperationException("Token is already used");
         IsUsed = true;
     }
+
+    public static EmailVerificationToken CreateNew(string token, Guid userId)
+    {
+        return new EmailVerificationToken
+        {
+            Id = Guid.NewGuid(),
+            ExpiresAt = DateTime.UtcNow.AddHours(1),
+            Token = token,
+            IsUsed = false,
+            UserId = userId
+        };
+    }
 }

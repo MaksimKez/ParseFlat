@@ -4,4 +4,4 @@ using MediatR;
 
 namespace Application.Commands.SendVerificationEmail;
 
-public record SendVerificationEmailCommand(SendVerificationEmailRequest request) : IRequest<SendVerificationEmailResult>;
+public record SendVerificationEmailCommand(SendVerificationEmailRequest Dto) : IRequest<SendVerificationEmailResult>;

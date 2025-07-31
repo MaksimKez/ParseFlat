@@ -26,8 +26,11 @@ public class EmailSender : IEmailSender
     {
         for (var attempt = 1; attempt <= MaxRetryAttempts; attempt++)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
+            if (cancellationToken.IsCancellationRequested)
+            {
+                _logger.LogInformation("Cancellation requested.");
+                return EmailSenderResult.Failure("Cancellation requested.", attempt);
+            }
             try
             {
                 var request = new MailjetRequest
