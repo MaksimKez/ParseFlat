@@ -1,5 +1,7 @@
+using System.Data;
 using Application.Abstractions.EmailService;
 using Application.Responses.Infrastructure;
+using Infrastructure.Email.Configs;
 using Infrastructure.Email.Interfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -17,7 +19,7 @@ public class EmailService(
     public async Task<EmailServiceResult> SendTokenEmailAsync(string toEmail, string toName, string token,
         CancellationToken cancellationToken = default)
     {
-        logger.LogInformation($"Sending email to {toEmail} with token {token}");
+        logger.LogInformation($"Building email to {toEmail} with token {token}");
 
         var emailJObject = emailBuilder
             .SetSubject("EmailVerification")
@@ -26,20 +28,13 @@ public class EmailService(
             .SetTextBody(token)   // temporary, later i will add endpoint for this
             .Build();
         
-        await emailSender.SendAsync(emailJObject, cancellationToken);
+        logger.LogInformation($"Email is built to email to {toEmail} with token {token}");
         
-        return new EmailServiceResult
-        {
-            ErrorMessage = null,
-            IsSuccess = true,
-            ToMail = toEmail
-        };
+        var result = await emailSender.SendAsync(emailJObject, cancellationToken);
+
+        return result.IsSuccess ?
+            EmailServiceResult.Success(toEmail) :           //exception is only for debugging, will be removed
+            EmailServiceResult.Failure(result.ErrorMessage ?? throw new InvalidExpressionException(), toEmail);
     }
 }
 
-public class MailSettings
-{
-    public string FromEmail { get; set; }
-    public string FromName { get; set; }
-    public string EmployeeEmail { get; set; }
-}
