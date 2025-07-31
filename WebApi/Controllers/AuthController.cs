@@ -9,6 +9,7 @@ public class AuthController(IMediator mediator) : ControllerBase
 {
     private readonly IMediator _mediator = mediator;
 
+    [HttpPost("register")]
     public async Task<IActionResult> RegisterUser([FromBody] RegisterUserCommand command)
     {
         var response = await _mediator.Send(command);

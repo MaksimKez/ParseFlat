@@ -17,14 +17,7 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddControllers();
 builder.Services.AddAuthentication();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
-    {
-        Title = "My API",
-        Version = "v1"
-    });
-});
+builder.Services.AddSwaggerGen();
 
 
 var app = builder.Build();
