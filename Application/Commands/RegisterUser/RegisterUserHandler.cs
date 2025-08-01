@@ -43,6 +43,8 @@ public class RegisterUserHandler : IRequestHandler<RegisterUserCommand, Register
             await _unitOfWork.Users.AddAsync(user, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
+            
+            //todo send request in UserService
 
             _logger.LogInformation("Successfully registered user {Email} with ID: {UserId}", user.Email, user.Id);
             return new RegisterUserResult(user.Id, true, null);

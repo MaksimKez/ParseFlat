@@ -11,7 +11,8 @@ public class EmailService(ILogger<EmailService> logger) : IEmailService
     {
         logger.LogInformation($"Sending email to {toEmail} with token {token}");
 
-        //temp
+
+        //todo send request to Notification Service
         await Task.Delay(300, cancellationToken);
         return new EmailServiceResult
         {
