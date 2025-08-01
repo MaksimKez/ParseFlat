@@ -43,6 +43,6 @@ public class LoginUserHandler(
         await unitOfWork.RefreshTokens.AddAsync(refreshToken, cancellationToken);
 
         logger.LogInformation("User {Email} logged in", user.Email);
-        return LoginUserResult.Success(user.Email, refreshToken, accessToken);
+        return LoginUserResult.Success(user.Email, refreshToken.Token, accessToken);
     }
 }

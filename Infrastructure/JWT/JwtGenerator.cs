@@ -39,7 +39,8 @@ public class JwtGenerator : IJwtGenerator
         {
             Id = id,
             Token = token,
-            UserId = user.Id
+            UserId = user.Id,
+            ExpiresAt = expires
         };
     }
 
