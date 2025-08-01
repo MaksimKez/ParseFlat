@@ -1,4 +1,5 @@
 using Application.Commands.RegisterUser;
+using Application.Dtos.Users;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,12 +8,15 @@ namespace WebApi.Controllers;
 [Route("api/[controller]")]
 public class AuthController(IMediator mediator) : ControllerBase
 {
-    private readonly IMediator _mediator = mediator;
-
     [HttpPost("register")]
-    public async Task<IActionResult> RegisterUser([FromBody] RegisterUserCommand command)
+    public async Task<ActionResult> RegisterUser([FromBody] RegisterUserRequest registerUserRequest)
     {
-        var response = await _mediator.Send(command);
-        return Ok(response);
+        var result = await mediator.Send(new RegisterUserCommand(registerUserRequest));
+        
+        return result.IsSuccess
+            ? CreatedAtAction(nameof(RegisterUser), result.RegisteredUserId)
+            : BadRequest(result.ErrorMessage);
     }
+    
+    
 }
