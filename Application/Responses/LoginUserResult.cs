@@ -8,10 +8,10 @@ public class LoginUserResult : IResult
     public string? ErrorMessage { get; init; }
     public string UserEmail { get; init; }
 
-    public RefreshToken RefreshToken { get; set; }
+    public string RefreshToken { get; set; }
     public string AccessToken { get; set; }
 
-    public static LoginUserResult Success(string email, RefreshToken refreshToken, string accessToken)
+    public static LoginUserResult Success(string email, string refreshToken, string accessToken)
     {
         return new LoginUserResult
         {

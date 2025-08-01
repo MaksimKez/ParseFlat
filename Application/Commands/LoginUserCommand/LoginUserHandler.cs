@@ -1,18 +1,48 @@
-using Application.Common.Interfaces;
+using Application.Abstractions.JWT;
+using Application.Abstractions.Security;
 using Application.Responses;
+using Domain.Abstractions;
 using MediatR;
+using Microsoft.Extensions.Logging;
 
 namespace Application.Commands.LoginUserCommand;
 
-public class LoginUserHandler : IRequestHandler<LoginUserCommand, LoginUserResult>
+public class LoginUserHandler(
+    IUnitOfWork unitOfWork,
+    IPasswordHasher passwordHasher,
+    IJwtGenerator jwtGenerator,
+    ILogger<LoginUserHandler> logger)
+    : IRequestHandler<LoginUserCommand, LoginUserResult>
 {
-    private readonly IUserService _userService;
-
-    public LoginUserHandler(IUserService userService)
+    public async Task<LoginUserResult> Handle(
+        LoginUserCommand command, 
+        CancellationToken cancellationToken)
     {
-        _userService = userService;
-    }
+        var request = command.Request;
+        
+        logger.LogInformation("Logging in user {Email}", request.Email);
 
-    public Task<LoginUserResult> Handle(LoginUserCommand request, CancellationToken cancellationToken)
-        => _userService.LoginAsync(request.Dto, cancellationToken);
+        var user = await unitOfWork.Users.FindByEmailAsync(request.Email, cancellationToken);
+        if (user is null)
+        {
+            logger.LogWarning("User {Email} not found", request.Email);
+            return LoginUserResult.Failure($"User with email {request.Email} does not exist");
+        }
+
+        var isValid = passwordHasher.VerifyHashedPassword(user.PasswordHash, request.Password);
+        if (!isValid)
+        {
+            logger.LogWarning("Invalid password for user {Email}", request.Email);
+            return LoginUserResult.Failure($"User with email {request.Email} does not match password");
+        }
+
+        // Генерируем токены
+        var refreshToken = jwtGenerator.GenerateRefreshToken(user);
+        var accessToken = jwtGenerator.GenerateAccessToken(user);
+
+        await unitOfWork.RefreshTokens.AddAsync(refreshToken, cancellationToken);
+
+        logger.LogInformation("User {Email} logged in", user.Email);
+        return LoginUserResult.Success(user.Email, refreshToken.Token, accessToken);
+    }
 }
