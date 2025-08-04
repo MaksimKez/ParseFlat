@@ -36,7 +36,6 @@ public class LoginUserHandler(
             return LoginUserResult.Failure($"User with email {request.Email} does not match password");
         }
 
-        // Генерируем токены
         var refreshToken = jwtGenerator.GenerateRefreshToken(user);
         var accessToken = jwtGenerator.GenerateAccessToken(user);
 
