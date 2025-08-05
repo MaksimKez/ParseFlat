@@ -1,4 +1,5 @@
 using Application.Commands.LoginUserCommand;
+using Application.Commands.RefreshAccessToken;
 using Application.Commands.RegisterUser;
 using Application.Dtos.Users;
 using MediatR;
@@ -26,6 +27,7 @@ public class AuthController(IMediator mediator) : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Login([FromBody] LoginUserRequest loginUserRequest)
     {
+        var token = HttpContext.Request.Headers.Authorization.ToString();
         var result = await mediator.Send(new LoginUserCommand(loginUserRequest));
 
         if (!result.IsSuccess)
@@ -42,4 +44,20 @@ public class AuthController(IMediator mediator) : ControllerBase
         return Ok(new { accessToken = result.AccessToken });
 
     }
+    
+    [HttpPost("refresh")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> RefreshToken()
+    {
+        if (!Request.Cookies.TryGetValue("refreshToken", out var refreshToken) || string.IsNullOrWhiteSpace(refreshToken))
+            return BadRequest("Refresh token is missing");
+
+        var result = await mediator.Send(new RefreshAccessTokenCommand(refreshToken));
+
+        return result.IsSuccess
+            ? Ok(new { accessToken = result.Token })
+            : BadRequest(result.ErrorMessage);
+    }
+
 }
