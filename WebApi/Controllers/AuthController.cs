@@ -1,3 +1,4 @@
+using System.IdentityModel.Tokens.Jwt;
 using Application.Commands.LoginUserCommand;
 using Application.Commands.RefreshAccessToken;
 using Application.Commands.RegisterUser;
@@ -5,7 +6,7 @@ using Application.Commands.SendVerificationLink;
 using Application.Dtos.Users;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using WebApi.Extensions;
+
 
 namespace WebApi.Controllers;
 [ApiController]
@@ -62,22 +63,25 @@ public class AuthController(IMediator mediator) : ControllerBase
             ? Ok(new { accessToken = result.Token })
             : BadRequest(result.ErrorMessage);
     }
-
+    
     [HttpPost("sendverificationlink")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> SendVerificationLink()
     {
-        var email = HttpContext.User.GetEmailFromToken();
-        if (string.IsNullOrWhiteSpace(email))
-            return BadRequest("Email not found in token");
+        var emailResult = ExtractEmailFromToken();
+        if (!emailResult.IsSuccess)
+            return BadRequest(emailResult.ErrorMessage);
 
-        var result = await mediator.Send(new SendVerificationLinkCommand(email));
-        
+        if (emailResult.Email == null) return BadRequest();
+        var result = await mediator.Send(new SendVerificationLinkCommand(emailResult.Email));
+
         return result.IsSuccess
             ? Ok("Verification link sent")
             : BadRequest(result.ErrorMessage);
+
     }
+
 
     
     [HttpPost("verifyemail")]
@@ -94,6 +98,28 @@ public class AuthController(IMediator mediator) : ControllerBase
         //    ? Ok("Email successfully verified")
         //    : BadRequest(result.ErrorMessage);
         return Ok();
+    }
+
+    private (bool IsSuccess, string? Email, string? ErrorMessage) ExtractEmailFromToken()
+    {
+        if (!Request.Cookies.TryGetValue("refreshToken", out var token) || string.IsNullOrWhiteSpace(token))
+            return (false, null, "Refresh token not found in cookies");
+
+        try
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var jwtToken = handler.ReadJwtToken(token);
+            var email = jwtToken.Claims.FirstOrDefault(c => c.Type == "email")?.Value;
+
+            if (string.IsNullOrWhiteSpace(email))
+                return (false, null, "Email not found in token");
+
+            return (true, email, null);
+        }
+        catch (Exception ex)
+        {
+            return (false, null, $"Invalid token format: {ex.Message}");
+        }
     }
 
 }
