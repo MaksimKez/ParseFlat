@@ -1,4 +1,3 @@
-using Domain.Abstractions;
 using Domain.Abstractions.Repositories;
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -55,11 +54,6 @@ public class TokenRepository<TDomain> : ITokenRepository<TDomain>
 
         _logger.LogInformation("Token found by token string.");
         return entity;
-    }
-
-    public void Update(TDomain token, CancellationToken cancellationToken = default)
-    {
-        _dbSet.Update(token);
     }
 
     public Task RemoveAsync(TDomain token, CancellationToken cancellationToken = default)

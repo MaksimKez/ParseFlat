@@ -9,8 +9,7 @@ namespace Application.Commands.VerifyEmail;
 public class VerifyEmailHandler(
     IUnitOfWork unitOfWork,
     ILogger<VerifyEmailHandler> logger)
-    : IRequestHandler<VerifyEmailCommand, VerifyEmailResult>,
-        ITransactionalCommand<VerifyEmailResult>
+    : IRequestHandler<VerifyEmailCommand, VerifyEmailResult>
 {
     public async Task<VerifyEmailResult> Handle(VerifyEmailCommand request, CancellationToken cancellationToken)
     {
@@ -41,9 +40,6 @@ public class VerifyEmailHandler(
         user.IsVerified = true;
         verification.IsUsed = true;
         
-        await unitOfWork.Users.UpdateAsync(user, cancellationToken);
-        unitOfWork.EmailVerificationTokens.Update(verification, cancellationToken);
-
         logger.LogInformation("User {UserId} successfully verified email", user.Id);
         return VerifyEmailResult.Success();
     }
