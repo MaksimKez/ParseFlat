@@ -1,9 +1,11 @@
 using Application.Commands.LoginUserCommand;
 using Application.Commands.RefreshAccessToken;
 using Application.Commands.RegisterUser;
+using Application.Commands.SendVerificationLink;
 using Application.Dtos.Users;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using WebApi.Extensions;
 
 namespace WebApi.Controllers;
 [ApiController]
@@ -50,14 +52,48 @@ public class AuthController(IMediator mediator) : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> RefreshToken()
     {
-        if (!Request.Cookies.TryGetValue("refreshToken", out var refreshToken) || string.IsNullOrWhiteSpace(refreshToken))
+        if (!Request.Cookies.TryGetValue("refreshToken", out var refreshToken)
+            || string.IsNullOrWhiteSpace(refreshToken))
             return BadRequest("Refresh token is missing");
 
         var result = await mediator.Send(new RefreshAccessTokenCommand(refreshToken));
-
+        
         return result.IsSuccess
             ? Ok(new { accessToken = result.Token })
             : BadRequest(result.ErrorMessage);
+    }
+
+    [HttpPost("sendverificationlink")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> SendVerificationLink()
+    {
+        var email = HttpContext.User.GetEmailFromToken();
+        if (string.IsNullOrWhiteSpace(email))
+            return BadRequest("Email not found in token");
+
+        var result = await mediator.Send(new SendVerificationLinkCommand(email));
+        
+        return result.IsSuccess
+            ? Ok("Verification link sent")
+            : BadRequest(result.ErrorMessage);
+    }
+
+    
+    [HttpPost("verifyemail")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> VerifyEmail([FromQuery] string token)
+    {
+        if (string.IsNullOrWhiteSpace(token))
+            return BadRequest("Verification token is missing");
+
+        //var result = await mediator.Send(new VerifyEmailCommand(token));
+
+        //return result.IsSuccess
+        //    ? Ok("Email successfully verified")
+        //    : BadRequest(result.ErrorMessage);
+        return Ok();
     }
 
 }
