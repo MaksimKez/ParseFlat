@@ -57,6 +57,11 @@ public class TokenRepository<TDomain> : ITokenRepository<TDomain>
         return entity;
     }
 
+    public void Update(TDomain token, CancellationToken cancellationToken = default)
+    {
+        _dbSet.Update(token);
+    }
+
     public Task RemoveAsync(TDomain token, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Removing token: {TokenId}", token.Id);

@@ -3,6 +3,7 @@ using Application.Commands.LoginUserCommand;
 using Application.Commands.RefreshAccessToken;
 using Application.Commands.RegisterUser;
 using Application.Commands.SendVerificationLink;
+using Application.Commands.VerifyEmail;
 using Application.Dtos.Users;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -81,8 +82,6 @@ public class AuthController(IMediator mediator) : ControllerBase
             : BadRequest(result.ErrorMessage);
 
     }
-
-
     
     [HttpPost("verifyemail")]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -92,12 +91,11 @@ public class AuthController(IMediator mediator) : ControllerBase
         if (string.IsNullOrWhiteSpace(token))
             return BadRequest("Verification token is missing");
 
-        //var result = await mediator.Send(new VerifyEmailCommand(token));
+        var result = await mediator.Send(new VerifyEmailCommand(token));
 
-        //return result.IsSuccess
-        //    ? Ok("Email successfully verified")
-        //    : BadRequest(result.ErrorMessage);
-        return Ok();
+        return result.IsSuccess
+            ? Ok("Email successfully verified")
+            : BadRequest(result.ErrorMessage);
     }
 
     private (bool IsSuccess, string? Email, string? ErrorMessage) ExtractEmailFromToken()
