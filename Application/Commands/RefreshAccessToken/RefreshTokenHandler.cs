@@ -22,9 +22,8 @@ public class RefreshAccessTokenCommandHandler(
         if (refreshToken.User is null)
             return RefreshTokenResult.Failure("User not found");
 
-        //! this is temporary, because user cannot be verified until NotificationService is done
-        //if (!refreshToken.User.IsVerified)
-        //    return RefreshTokenResult.Failure("User is not verified");
+        if (!refreshToken.User.IsVerified)
+            return RefreshTokenResult.Failure("User is not verified");
 
         if (refreshToken.User.IsDeleted)
             return RefreshTokenResult.Failure("User is deleted");
