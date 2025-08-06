@@ -13,12 +13,11 @@ public static class InfrastructureDependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services)
     {
-
-        
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IJwtGenerator, JwtGenerator>();
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<ITokenGenerator, TokenGenerator>();
+        services.AddScoped<IEmailVerificationService, EmailVerificationService>();
             
         return services;
     }

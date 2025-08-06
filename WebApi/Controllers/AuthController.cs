@@ -77,6 +77,11 @@ public class AuthController(IMediator mediator) : ControllerBase
         if (emailResult.Email == null) return BadRequest();
         var result = await mediator.Send(new SendVerificationLinkCommand(emailResult.Email));
 
+        if (result.IsSuccess)
+        {
+            Response.Cookies.Delete("refreshToken");
+        }
+        
         return result.IsSuccess
             ? Ok("Verification link sent")
             : BadRequest(result.ErrorMessage);
@@ -92,7 +97,7 @@ public class AuthController(IMediator mediator) : ControllerBase
             return BadRequest("Verification token is missing");
 
         var result = await mediator.Send(new VerifyEmailCommand(token));
-
+        
         return result.IsSuccess
             ? Ok("Email successfully verified")
             : BadRequest(result.ErrorMessage);
@@ -119,5 +124,4 @@ public class AuthController(IMediator mediator) : ControllerBase
             return (false, null, $"Invalid token format: {ex.Message}");
         }
     }
-
 }
