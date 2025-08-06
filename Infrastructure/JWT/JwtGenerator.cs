@@ -51,7 +51,6 @@ public class JwtGenerator : IJwtGenerator
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
             new Claim(JwtRegisteredClaimNames.Jti, tokenId?.ToString() ?? Guid.NewGuid().ToString()),
-            new Claim("email_verified", user.IsVerified.ToString().ToLower()),
             new Claim(JwtRegisteredClaimNames.Iat,
                 new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds().ToString(),
                 ClaimValueTypes.Integer64)
