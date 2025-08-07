@@ -4,7 +4,6 @@ using Application.Dtos.Settings;
 using Infrastructure;
 using Infrastructure.JWT;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Identity.Client.Utils;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Persistence;
@@ -81,8 +80,6 @@ builder.Services.AddSwaggerGen(c =>
 
 
 builder.Services.AddControllers();
-builder.Services.AddAuthentication();
-builder.Services.AddSwaggerGen();
 
 
 var app = builder.Build();
