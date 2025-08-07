@@ -50,7 +50,7 @@ public class EmailVerificationService(
     public async Task<VerifyEmailResult> VerifyEmailAsync(string tokenValue, CancellationToken cancellationToken)
     {
         var verification = await unitOfWork.EmailVerificationTokens
-            .FindByTokenAsync(tokenValue, cancellationToken);
+                                            .FindByTokenAsync(tokenValue, cancellationToken);
 
         if (verification is null)
         {
