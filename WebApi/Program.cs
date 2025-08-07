@@ -1,7 +1,10 @@
+using System.Text;
 using Application.DependencyInjection;
+using Application.Dtos.Settings;
 using Infrastructure;
 using Infrastructure.JWT;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Persistence;
@@ -10,6 +13,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 //temporary
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(nameof(JwtOptions)));
+builder.Services.Configure<AuthOptions>(
+    builder.Configuration.GetSection(AuthOptions.SectionName));
 
 builder.Services.AddInfrastructure();
 builder.Services.AddPersistence(builder.Configuration);
@@ -20,9 +25,12 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        var secretKey = builder.Configuration["JwtOptions:SecretKey"];
+        var keyBytes = Encoding.UTF8.GetBytes(secretKey);
+
         options.TokenValidationParameters = new TokenValidationParameters
         {
-            IssuerSigningKey = new SymmetricSecurityKey("superSecretKey@345superSecretKey@345"u8.ToArray()), 
+            IssuerSigningKey = new SymmetricSecurityKey(keyBytes), 
                     
             ValidateIssuer = false,
             ValidateAudience = false,
