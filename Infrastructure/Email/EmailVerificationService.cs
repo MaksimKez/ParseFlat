@@ -14,6 +14,8 @@ public class EmailVerificationService(
     ILogger<EmailVerificationService> logger)
     : IEmailVerificationService
 {
+
+    private const int emailVerificationTokeHours = 24; 
     public async Task<SendVerificationLinkResult> SendVerificationLinkAsync(string email, CancellationToken cancellationToken)
     {
         var user = await unitOfWork.Users.FindByEmailAsync(email, cancellationToken);
@@ -29,7 +31,7 @@ public class EmailVerificationService(
         {
             UserId = user.Id,
             Token = token,
-            ExpiresAt = DateTime.UtcNow.AddHours(24)
+            ExpiresAt = DateTime.UtcNow.AddHours(emailVerificationTokeHours)
         };
 
         await unitOfWork.EmailVerificationTokens.AddAsync(emailVerification, cancellationToken);
