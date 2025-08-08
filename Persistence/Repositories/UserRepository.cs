@@ -37,7 +37,7 @@ public class UserRepository : IUserRepository
     {
         _logger.LogInformation("Finding user by email: {Email}", email);
         var user = await _users
-            .FirstOrDefaultAsync(u => u.Email == email && !u.IsDeleted, cancellationToken);
+                            .FirstOrDefaultAsync(u => u.Email == email && !u.IsDeleted, cancellationToken);
 
         if (user == null)
         {

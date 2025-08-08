@@ -33,6 +33,6 @@ public class RegisterUserHandler(
         await unitOfWork.Users.AddAsync(user, cancellationToken);
 
         logger.LogInformation("Successfully registered user {Email}", user.Email);
-        return new RegisterUserResult(user.Id, true, null);
+        return RegisterUserResult.Success(user.Id);
     }
 }

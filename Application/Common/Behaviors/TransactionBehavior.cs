@@ -1,4 +1,5 @@
 using Application.Abstractions.Messaging;
+using Application.Responses;
 using Domain.Abstractions;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -9,7 +10,7 @@ public class TransactionBehavior<TRequest, TResponse>(
     IUnitOfWork unitOfWork,
     ILogger<TransactionBehavior<TRequest, TResponse>> logger)
     : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : notnull
+    where TRequest : notnull 
 {
     public async Task<TResponse> Handle(
         TRequest request, 
@@ -18,7 +19,6 @@ public class TransactionBehavior<TRequest, TResponse>(
     {
         var isTransactional = request is ITransactionalCommand<TResponse>;
 
-        
         if (!isTransactional)
         {
             return await next(cancellationToken);
@@ -28,16 +28,23 @@ public class TransactionBehavior<TRequest, TResponse>(
         logger.LogInformation("Starting transaction for {RequestName}", requestName);
 
         using var transaction = await unitOfWork.BeginTransactionAsync(cancellationToken);
-        
+
         try
         {
             var response = await next(cancellationToken);
-            
+
+            if (response is IResult { IsSuccess: false })
+            {
+                logger.LogWarning("Operation failed for {RequestName}, rolling back transaction", requestName);
+                await transaction.RollbackAsync(cancellationToken);
+                return response;
+            }
+
             await unitOfWork.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
-            
+
             logger.LogInformation("Transaction committed successfully for {RequestName}", requestName);
-            
+
             return response;
         }
         catch (Exception ex)
@@ -47,4 +54,5 @@ public class TransactionBehavior<TRequest, TResponse>(
             throw;
         }
     }
+
 }

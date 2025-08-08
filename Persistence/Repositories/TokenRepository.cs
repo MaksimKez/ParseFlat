@@ -1,4 +1,3 @@
-using Domain.Abstractions;
 using Domain.Abstractions.Repositories;
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -44,7 +43,9 @@ public class TokenRepository<TDomain> : ITokenRepository<TDomain>
     public async Task<TDomain?> FindByTokenAsync(string token, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Finding token by token string.");
-        var entity = await _dbSet.FirstOrDefaultAsync(e => e.Token == token, cancellationToken);
+        var entity = await _dbSet
+            .Include(e => e.User)
+            .FirstOrDefaultAsync(e => e.Token == token, cancellationToken);
         if (entity == null)
         {
             _logger.LogWarning("Token not found by token string.");
