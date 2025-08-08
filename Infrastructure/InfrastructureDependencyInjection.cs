@@ -21,7 +21,7 @@ public static class InfrastructureDependencyInjection
         services.AddScoped<ITokenGenerator, TokenGenerator>();
         services.AddScoped<IVerificationService, VerificationService>();
         services.AddScoped<IPasswordResetService, PasswordResetService>();
-            
+
         return services;
     }
 }
