@@ -11,14 +11,23 @@ public class EmailService(ILogger<EmailService> logger) : IEmailService
     {
         logger.LogInformation($"Sending email to {toEmail} with token {token}");
 
-
         //todo send request to Notification Service
         await Task.Delay(300, cancellationToken);
+        
+        SimulateEmailSent(token);
+
         return new EmailServiceResult
         {
             ErrorMessage = null,
             IsSuccess = true,
             ToMail = toEmail
         };
+    }
+    
+    private void SimulateEmailSent(string token)
+    {
+        Console.WriteLine(token);
+        Console.WriteLine(token);
+        Console.WriteLine(token);
     }
 }

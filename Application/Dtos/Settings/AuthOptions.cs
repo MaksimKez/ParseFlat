@@ -23,6 +23,7 @@ public class AuthOptions
 
     public class MessageSettings
     {
+        public string PasswordChanged { get; set; } = "Password changed successfully";
         public string RefreshTokenMissing { get; set; } = "Refresh token is missing";
         public string VerificationLinkSent { get; set; } = "Verification link sent";
         public string EmailVerified { get; set; } = "Email successfully verified";

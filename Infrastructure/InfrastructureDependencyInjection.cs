@@ -15,11 +15,13 @@ public static class InfrastructureDependencyInjection
     {
         services.AddScoped<IAuthHelper, AuthHelper.AuthHelper>();
         services.AddScoped<IEmailService, EmailService>();
+        services.AddScoped<IEmailVerifier, EmailVerifier>();
         services.AddScoped<IJwtGenerator, JwtGenerator>();
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<ITokenGenerator, TokenGenerator>();
-        services.AddScoped<IEmailVerificationService, EmailVerificationService>();
-            
+        services.AddScoped<IVerificationService, VerificationService>();
+        services.AddScoped<IPasswordResetService, PasswordResetService>();
+
         return services;
     }
 }
