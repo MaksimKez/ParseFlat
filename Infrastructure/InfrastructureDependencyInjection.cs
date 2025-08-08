@@ -18,7 +18,7 @@ public static class InfrastructureDependencyInjection
         services.AddScoped<IJwtGenerator, JwtGenerator>();
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<ITokenGenerator, TokenGenerator>();
-        services.AddScoped<IEmailVerificationService, EmailVerificationService>();
+        services.AddScoped<IVerificationService, VerificationService>();
             
         return services;
     }

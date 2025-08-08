@@ -5,18 +5,19 @@ using Domain.Abstractions;
 using Domain.Entities;
 using Microsoft.Extensions.Logging;
 
-namespace Infrastructure.Email;
+namespace Infrastructure.Security;
 
-public class EmailVerificationService(
+public class VerificationService(
     IUnitOfWork unitOfWork,
     ITokenGenerator tokenGenerator,
     IEmailService emailService,
-    ILogger<EmailVerificationService> logger)
-    : IEmailVerificationService
+    ILogger<VerificationService> logger)
+    : IVerificationService
 {
 
     private const int emailVerificationTokeHours = 24; 
-    public async Task<SendVerificationLinkResult> SendVerificationLinkAsync(string email, CancellationToken cancellationToken)
+    public async Task<SendVerificationLinkResult> SendVerificationLinkAsync(string email, bool isEmailVerification,
+                                                        CancellationToken cancellationToken)
     {
         var user = await unitOfWork.Users.FindByEmailAsync(email, cancellationToken);
         if (user == null)
@@ -27,14 +28,14 @@ public class EmailVerificationService(
 
         var token = tokenGenerator.GenerateToken();
 
-        var emailVerification = new EmailVerificationToken
+        if (isEmailVerification)
         {
-            UserId = user.Id,
-            Token = token,
-            ExpiresAt = DateTime.UtcNow.AddHours(emailVerificationTokeHours)
-        };
-
-        await unitOfWork.EmailVerificationTokens.AddAsync(emailVerification, cancellationToken);
+            await CreateEmailVerificationTokenAsync(user.Id, token, cancellationToken);
+        }
+        else
+        {
+            await CreatePasswordVerificationTokenAsync(user.Id, token, cancellationToken);
+        }
 
         var emailResult = await emailService.SendEmailAsync(user.Email, user.Name, token, cancellationToken);
 
@@ -49,6 +50,31 @@ public class EmailVerificationService(
         return SendVerificationLinkResult.Success();
     }
 
+    private async Task CreateEmailVerificationTokenAsync(Guid userId, string token, CancellationToken cancellationToken)
+    {
+        var emailVerificationToken = new EmailVerificationToken
+        {
+            UserId = userId,
+            Token = token,
+            ExpiresAt = DateTime.UtcNow.AddHours(emailVerificationTokeHours)
+        };
+
+        await unitOfWork.EmailVerificationTokens.AddAsync(emailVerificationToken, cancellationToken);
+    }
+
+    private async Task CreatePasswordVerificationTokenAsync(Guid userId, string token, CancellationToken cancellationToken)
+    {
+        var passwordVerificationToken = new PasswordResetToken()
+        {
+            UserId = userId,
+            Token = token,
+            ExpiresAt = DateTime.UtcNow.AddHours(emailVerificationTokeHours)
+        };
+
+        await unitOfWork.PasswordResetTokens.AddAsync(passwordVerificationToken, cancellationToken);
+    }
+
+    //todo move to the other service
     public async Task<VerifyEmailResult> VerifyEmailAsync(string tokenValue, CancellationToken cancellationToken)
     {
         var verification = await unitOfWork.EmailVerificationTokens

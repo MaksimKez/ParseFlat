@@ -67,7 +67,7 @@ public class AuthController(IMediator mediator, IAuthHelper authHelper, IOptions
     [HttpPost("sendverificationlink")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> SendVerificationLink()
+    public async Task<IActionResult> SendVerificationLink(bool isEmailVerification)
     {
         var refreshTokenResult = authHelper.GetRefreshToken(Request.Cookies);
 
@@ -79,7 +79,7 @@ public class AuthController(IMediator mediator, IAuthHelper authHelper, IOptions
         if (!emailResult.IsSuccess)
             return BadRequest(emailResult.ErrorMessage);
 
-        var result = await mediator.Send(new SendVerificationLinkCommand(emailResult.Value!));
+        var result = await mediator.Send(new SendVerificationLinkCommand(emailResult.Value!, isEmailVerification));
 
         if (result.IsSuccess)
         {
