@@ -1,3 +1,5 @@
+using Domain.Entities;
+
 namespace Domain.Abstractions.Repositories;
 
 public interface ITokenRepository<T> where T : TokenBase

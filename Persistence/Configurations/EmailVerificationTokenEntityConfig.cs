@@ -1,12 +1,12 @@
+using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Persistence.Entities;
 
 namespace Persistence.Configurations;
 
-public class EmailVerificationTokenEntityConfig : IEntityTypeConfiguration<EmailVerificationTokenEntity>
+public class EmailVerificationTokenEntityConfig : IEntityTypeConfiguration<EmailVerificationToken>
 {
-    public void Configure(EntityTypeBuilder<EmailVerificationTokenEntity> builder)
+    public void Configure(EntityTypeBuilder<EmailVerificationToken> builder)
     {
         builder.ToTable("EmailVerificationTokens");
         
