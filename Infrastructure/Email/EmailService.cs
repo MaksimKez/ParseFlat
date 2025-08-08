@@ -14,6 +14,9 @@ public class EmailService(ILogger<EmailService> logger) : IEmailService
 
         //todo send request to Notification Service
         await Task.Delay(300, cancellationToken);
+        
+        SimulateEmailSent(token);
+        
         return new EmailServiceResult
         {
             ErrorMessage = null,
@@ -21,4 +24,12 @@ public class EmailService(ILogger<EmailService> logger) : IEmailService
             ToMail = toEmail
         };
     }
+    
+    private void SimulateEmailSent(string token)
+    {
+        Console.WriteLine(token);
+        Console.WriteLine(token);
+        Console.WriteLine(token);
+    }
+
 }

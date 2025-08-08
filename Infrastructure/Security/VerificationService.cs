@@ -45,7 +45,6 @@ public class VerificationService(
             return SendVerificationLinkResult.Failure("Failed to send verification email");
         }
 
-        SimulateEmailSent(token);
         logger.LogInformation("Verification email sent to {Email}", user.Email);
         return SendVerificationLinkResult.Success();
     }
@@ -72,44 +71,5 @@ public class VerificationService(
         };
 
         await unitOfWork.PasswordResetTokens.AddAsync(passwordVerificationToken, cancellationToken);
-    }
-
-    //todo move to the other service
-    public async Task<VerifyEmailResult> VerifyEmailAsync(string tokenValue, CancellationToken cancellationToken)
-    {
-        var verification = await unitOfWork.EmailVerificationTokens
-                                            .FindByTokenAsync(tokenValue, cancellationToken);
-
-        if (verification is null)
-        {
-            logger.LogWarning("Verification token not found: {Token}", tokenValue);
-            return VerifyEmailResult.Failure("Invalid or expired token.");
-        }
-
-        if (verification.IsUsed || verification.ExpiresAt < DateTime.UtcNow)
-        {
-            logger.LogWarning("Verification token expired or already used: {Token}", tokenValue);
-            return VerifyEmailResult.Failure("Token expired or already used.");
-        }
-
-        var user = verification.User;
-        if (user is null)
-        {
-            logger.LogError("User not loaded for token: {Token}", tokenValue);
-            return VerifyEmailResult.Failure("User data missing.");
-        }
-
-        user.IsVerified = true;
-        verification.IsUsed = true;
-
-        logger.LogInformation("User {UserId} successfully verified email", user.Id);
-        return VerifyEmailResult.Success();
-    }
-
-    private void SimulateEmailSent(string token)
-    {
-        Console.WriteLine(token);
-        Console.WriteLine(token);
-        Console.WriteLine(token);
     }
 }

@@ -5,7 +5,7 @@ using MediatR;
 
 namespace Application.Commands.VerifyEmail;
 
-public class VerifyEmailHandler(IVerificationService service)
+public class VerifyEmailHandler(IEmailVerifier service)
     : IRequestHandler<VerifyEmailCommand, VerifyEmailResult>
 {
     public Task<VerifyEmailResult> Handle(VerifyEmailCommand request, CancellationToken cancellationToken) 
