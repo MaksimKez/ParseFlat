@@ -2,8 +2,10 @@ using Application.Abstractions.AuthHelper;
 using Application.Commands.LoginUserCommand;
 using Application.Commands.RefreshAccessToken;
 using Application.Commands.RegisterUser;
+using Application.Commands.ResetPassword;
 using Application.Commands.SendVerificationLink;
 using Application.Commands.VerifyEmail;
+using Application.Dtos;
 using Application.Dtos.Settings;
 using Application.Dtos.Users;
 using MediatR;
@@ -67,7 +69,7 @@ public class AuthController(IMediator mediator, IAuthHelper authHelper, IOptions
     [HttpPost("sendverificationlink")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> SendVerificationLink()
+    public async Task<IActionResult> SendVerificationLink(bool isEmailVerification)
     {
         var refreshTokenResult = authHelper.GetRefreshToken(Request.Cookies);
 
@@ -79,7 +81,7 @@ public class AuthController(IMediator mediator, IAuthHelper authHelper, IOptions
         if (!emailResult.IsSuccess)
             return BadRequest(emailResult.ErrorMessage);
 
-        var result = await mediator.Send(new SendVerificationLinkCommand(emailResult.Value!));
+        var result = await mediator.Send(new SendVerificationLinkCommand(emailResult.Value!, isEmailVerification));
 
         if (result.IsSuccess)
         {
@@ -102,6 +104,18 @@ public class AuthController(IMediator mediator, IAuthHelper authHelper, IOptions
 
         return result.IsSuccess
             ? Ok(authOptions.Messages.EmailVerified)
+            : BadRequest(result.ErrorMessage);
+    }
+
+    [HttpPost("changepassword")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ChangePassword([FromBody] ResetPasswordRequest resetPasswordRequest)
+    {
+        var result = await mediator.Send(new ResetPasswordCommand(resetPasswordRequest));
+        
+        return result.IsSuccess
+            ? Ok(authOptions.Messages.PasswordChanged)
             : BadRequest(result.ErrorMessage);
     }
 
