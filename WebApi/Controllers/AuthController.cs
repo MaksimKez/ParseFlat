@@ -119,7 +119,6 @@ public class AuthController(IMediator mediator, IAuthHelper authHelper, IOptions
             : BadRequest(result.ErrorMessage);
     }
 
-
     private void SetRefreshTokenCookie(string token)
     {
         Response.Cookies.Append(authOptions.Cookie.RefreshTokenName, token, new CookieOptions
