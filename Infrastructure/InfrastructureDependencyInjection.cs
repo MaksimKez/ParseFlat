@@ -2,6 +2,7 @@ using Application.Abstractions.AuthHelper;
 using Application.Abstractions.EmailService;
 using Application.Abstractions.JWT;
 using Application.Abstractions.Security;
+using Application.Abstractions.UserService;
 using Infrastructure.Email;
 using Infrastructure.JWT;
 using Infrastructure.Security;
@@ -13,6 +14,7 @@ public static class InfrastructureDependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services)
     {
+        services.AddScoped<IUserServiceClient, UserServiceClient.UserServiceClient>();
         services.AddScoped<IAuthHelper, AuthHelper.AuthHelper>();
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IEmailVerifier, EmailVerifier>();

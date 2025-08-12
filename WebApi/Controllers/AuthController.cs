@@ -76,12 +76,12 @@ public class AuthController(IMediator mediator, IAuthHelper authHelper, IOptions
         if (!refreshTokenResult.IsSuccess || refreshTokenResult.Value == null)
             return BadRequest(refreshTokenResult.ErrorMessage);
 
-        var emailResult = authHelper.GetEmailFromToken(refreshTokenResult.Value);
+        var nameResult = authHelper.GetNameFromToken(refreshTokenResult.Value);
 
-        if (!emailResult.IsSuccess)
-            return BadRequest(emailResult.ErrorMessage);
+        if (!nameResult.IsSuccess)
+            return BadRequest(nameResult.ErrorMessage);
 
-        var result = await mediator.Send(new SendVerificationLinkCommand(emailResult.Value!, isEmailVerification));
+        var result = await mediator.Send(new SendVerificationLinkCommand(nameResult.Value!, isEmailVerification));
 
         if (result.IsSuccess)
         {

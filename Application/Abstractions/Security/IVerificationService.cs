@@ -5,7 +5,7 @@ namespace Application.Abstractions.Security;
 public interface IVerificationService
 {
     Task<SendVerificationLinkResult> SendVerificationLinkAsync(
-        string email,
+        string name,
         bool isEmailVerification,
         CancellationToken cancellationToken);
 }

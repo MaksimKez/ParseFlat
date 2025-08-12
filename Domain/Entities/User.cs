@@ -6,7 +6,6 @@ public class User
     public string Name { get; set; }
     public string LastName { get; set; }
     
-    public string Email { get; set; }
     public string PasswordHash { get; set; }
 
     public bool IsVerified { get; set; }
@@ -17,7 +16,6 @@ public class User
     public ICollection<EmailVerificationToken> EmailVerificationTokens { get; set; }
     
     public static User CreateNew(
-        string email,
         string password,
         string name,
         string lastName)
@@ -25,7 +23,6 @@ public class User
         return new User
         {
             Id = Guid.NewGuid(),
-            Email = email,
             PasswordHash = password,
             IsVerified = false,
             Name = name,
