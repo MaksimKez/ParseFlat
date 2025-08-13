@@ -1,51 +1,111 @@
+using System.Net.Http.Json;
 using Application.Abstractions.UserService;
+using Application.Dtos;
+using Application.Dtos.Settings;
 using Application.Dtos.Users;
 using Application.Responses;
+using Microsoft.Extensions.Options;
+using Polly;
+using Polly.Retry;
 
 namespace Infrastructure.UserServiceClient;
 
 public class UserServiceClient : IUserServiceClient
 {
-    public async Task<UserServiceResult> FindByEmailAsync(string email, CancellationToken cancellationToken)
+    private readonly HttpClient _httpClient;
+    private readonly ResiliencePipeline _retryPipeline;
+
+    public UserServiceClient(HttpClient httpClient, IOptions<UserProfileClientSettings> settingsOptions)
     {
-        await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
+        var settings = settingsOptions.Value;
         
-        //it is used in 1 scenario, so user - null for positive registration
-        return new UserServiceResult()
-        {
-            ErrorMessage = "Not found",
-            IsSuccess = false,
-            User = null
-        };
+        _httpClient = httpClient;
+        _httpClient.BaseAddress = new Uri(settings.BaseUrl);
+
+        _retryPipeline = new ResiliencePipelineBuilder()
+            .AddRetry(new RetryStrategyOptions
+            {
+                MaxRetryAttempts = settings.RetryCount,
+                Delay = TimeSpan.FromSeconds(settings.RetryDelaySeconds),
+                BackoffType = DelayBackoffType.Constant,
+                ShouldHandle = new PredicateBuilder()
+                    .Handle<HttpRequestException>()
+                    .Handle<TaskCanceledException>(),
+                })
+            .Build();
     }
 
-    public async Task<UserServiceResult> FindByIdAsync(Guid id, CancellationToken cancellationToken)
-    {
-        await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
-        return new UserServiceResult()
+    public async Task<UserServiceResult> FindByIdAsync(Guid id, CancellationToken ct) =>
+        await _retryPipeline.ExecuteAsync(async token =>
         {
-            ErrorMessage = null,
-            IsSuccess = true,
-            User = new UserDto()
-            {
-                Email = "email@gmail.com",
-                Id = id
-            }
-        };
-    }
+            var response = await _httpClient.GetAsync($"{id}", token);
 
-    public async Task<UserServiceResult> AddUserAsync(UserDto userDto, CancellationToken cancellationToken)
-    {
-        await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
-        return new UserServiceResult()
-        {
-            ErrorMessage = null,
-            IsSuccess = true,
-            User = new UserDto()
+            if (!response.IsSuccessStatusCode)
             {
-                Email = "email@gmail.com",
-                Id = userDto.Id
+                return new UserServiceResult
+                {
+                    IsSuccess = false,
+                    ErrorMessage = response.ReasonPhrase
+                };
             }
-        };
-    }
+
+            var user = await response.Content.ReadFromJsonAsync<UserDto>(cancellationToken: token);
+            return new UserServiceResult
+            {
+                IsSuccess = true,
+                User = user
+            };
+        }, ct);
+    
+    public async Task<UserServiceResult> FindByEmailAsync(string email, CancellationToken ct) =>
+        await _retryPipeline.ExecuteAsync(async token =>
+        {
+            var response = await _httpClient.GetAsync($"by-email?email={Uri.EscapeDataString(email)}", token);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return new UserServiceResult
+                {
+                    IsSuccess = false,
+                    ErrorMessage = response.ReasonPhrase
+                };
+            }
+
+            var user = await response.Content.ReadFromJsonAsync<UserDto>(cancellationToken: token);
+            return new UserServiceResult
+            {
+                IsSuccess = true,
+                User = user
+            };
+        }, ct);
+
+    public async Task<UserServiceResult> AddUserAsync(UserDto dto, CancellationToken ct) =>
+        await _retryPipeline.ExecuteAsync(async token =>
+        {
+            var request = new AddUserProfileRequest
+            {
+                Email = dto.Email,
+                Id = dto.Id,
+                LastName = dto.LastName,
+                Name = dto.Name
+            };  
+            
+            var response = await _httpClient.PostAsJsonAsync(string.Empty, request, token);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return new UserServiceResult
+                {
+                    IsSuccess = false,
+                    ErrorMessage = response.ReasonPhrase
+                };
+            }
+
+            var user = await response.Content.ReadFromJsonAsync<UserDto>(cancellationToken: token);
+            return new UserServiceResult
+            {
+                IsSuccess = true,
+                User = user
+            };
+        }, ct);
 }

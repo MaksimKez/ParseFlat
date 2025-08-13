@@ -7,6 +7,7 @@ using Infrastructure.Email;
 using Infrastructure.JWT;
 using Infrastructure.Security;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace Infrastructure;
 
@@ -14,6 +15,8 @@ public static class InfrastructureDependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services)
     {
+        services.AddHttpClient<IUserServiceClient, UserServiceClient.UserServiceClient>();
+
         services.AddScoped<IUserServiceClient, UserServiceClient.UserServiceClient>();
         services.AddScoped<IAuthHelper, AuthHelper.AuthHelper>();
         services.AddScoped<IEmailService, EmailService>();

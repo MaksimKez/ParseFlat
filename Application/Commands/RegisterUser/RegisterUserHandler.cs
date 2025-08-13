@@ -39,6 +39,8 @@ public class RegisterUserHandler(
         {
             Email = request.Email,
             Id = user.Id,
+            Name = request.Name,
+            LastName = request.LastName
         }, cancellationToken);
 
         if (!result.IsSuccess)
