@@ -130,3 +130,4 @@ public class AuthController(IMediator mediator, IAuthHelper authHelper, IOptions
         });
     }
 }
+
