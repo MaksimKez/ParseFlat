@@ -5,5 +5,5 @@ namespace Application.Abstractions.AuthHelper;
 public interface IAuthHelper
 {
     AuthHelperResult GetRefreshToken(IEnumerable<KeyValuePair<string, string>> valuePairs);
-    AuthHelperResult GetEmailFromToken(string token);
+    AuthHelperResult GetNameFromToken(string token);
 }

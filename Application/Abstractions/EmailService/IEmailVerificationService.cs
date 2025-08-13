@@ -4,6 +4,6 @@ namespace Application.Abstractions.EmailService;
 
 public interface IEmailVerificationService
 {
-    Task<SendVerificationLinkResult> SendVerificationLinkAsync(string email, CancellationToken cancellationToken);
+    Task<SendVerificationLinkResult> SendVerificationLinkAsync(string name, CancellationToken cancellationToken);
     Task<VerifyEmailResult> VerifyEmailAsync(string token, CancellationToken cancellationToken);
 }

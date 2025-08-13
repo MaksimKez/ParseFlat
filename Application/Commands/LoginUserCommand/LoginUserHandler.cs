@@ -20,20 +20,20 @@ public class LoginUserHandler(
     {
         var request = command.Request;
         
-        logger.LogInformation("Logging in user {Email}", request.Email);
+        logger.LogInformation("Logging in user {Email}", request.Name);
 
-        var user = await unitOfWork.Users.FindByEmailAsync(request.Email, cancellationToken);
+        var user = await unitOfWork.Users.FindByNameAsync(request.Name, cancellationToken);
         if (user is null)
         {
-            logger.LogWarning("User {Email} not found", request.Email);
-            return LoginUserResult.Failure($"User with email {request.Email} does not exist");
+            logger.LogWarning("User {Email} not found", request.Name);
+            return LoginUserResult.Failure($"User with email {request.Name} does not exist");
         }
 
         var isValid = passwordHasher.VerifyHashedPassword(user.PasswordHash, request.Password);
         if (!isValid)
         {
-            logger.LogWarning("Invalid password for user {Email}", request.Email);
-            return LoginUserResult.Failure($"User with email {request.Email} does not match password");
+            logger.LogWarning("Invalid password for user {Name}", request.Name);
+            return LoginUserResult.Failure($"User with name {request.Name} does not match password");
         }
 
         var refreshToken = jwtGenerator.GenerateRefreshToken(user);
@@ -41,7 +41,7 @@ public class LoginUserHandler(
 
         await unitOfWork.RefreshTokens.AddAsync(refreshToken, cancellationToken);
 
-        logger.LogInformation("User {Email} logged in", user.Email);
-        return LoginUserResult.Success(user.Email, refreshToken.Token, accessToken);
+        logger.LogInformation("User {Email} logged in", user.Name);
+        return LoginUserResult.Success(user.Name, refreshToken.Token, accessToken);
     }
 }

@@ -14,6 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(nameof(JwtOptions)));
 builder.Services.Configure<AuthOptions>(
     builder.Configuration.GetSection(AuthOptions.SectionName));
+builder.Services.Configure<UserProfileClientSettings>(builder.Configuration.GetSection(UserProfileClientSettings.SectionName));
 
 builder.Services.AddInfrastructure();
 builder.Services.AddPersistence(builder.Configuration);

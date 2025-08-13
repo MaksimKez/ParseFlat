@@ -33,19 +33,19 @@ public class UserRepository : IUserRepository
         return user;
     }
 
-    public async Task<User?> FindByEmailAsync(string email, CancellationToken cancellationToken = default)
+    public async Task<User?> FindByNameAsync(string name, CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Finding user by email: {Email}", email);
+        _logger.LogInformation("Finding user by email: {Email}", name);
         var user = await _users
-                            .FirstOrDefaultAsync(u => u.Email == email && !u.IsDeleted, cancellationToken);
+                            .FirstOrDefaultAsync(u => u.Name == name && !u.IsDeleted, cancellationToken);
 
         if (user == null)
         {
-            _logger.LogWarning("User not found with email: {Email}", email);
+            _logger.LogWarning("User not found with email: {Email}", name);
             return null;
         }
 
-        _logger.LogInformation("User found with email: {Email}", email);
+        _logger.LogInformation("User found with email: {Email}", name);
         return user;
     }
 
@@ -68,7 +68,6 @@ public class UserRepository : IUserRepository
 
         existingUser.Name = user.Name;
         existingUser.LastName = user.LastName;
-        existingUser.Email = user.Email;
         existingUser.PasswordHash = user.PasswordHash;
         existingUser.IsVerified = user.IsVerified;
 

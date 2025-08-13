@@ -9,5 +9,5 @@ public class SendVerificationLinkHandler(IVerificationService service)
     : IRequestHandler<SendVerificationLinkCommand, SendVerificationLinkResult>
 {
     public Task<SendVerificationLinkResult> Handle(SendVerificationLinkCommand request, CancellationToken cancellationToken)
-        => service.SendVerificationLinkAsync(request.Email, request.IsEmailVerification, cancellationToken);
+        => service.SendVerificationLinkAsync(request.Name, request.IsEmailVerification, cancellationToken);
 }

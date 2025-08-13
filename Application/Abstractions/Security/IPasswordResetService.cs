@@ -4,5 +4,8 @@ namespace Application.Abstractions.Security;
 
 public interface IPasswordResetService
 {
-    Task<PasswordResetResult> ResetPasswordAsync(string token, string newPassword, CancellationToken cancellationToken);
+    Task<PasswordResetResult> ResetPasswordAsync(
+        string token,
+        string newPassword,
+        CancellationToken cancellationToken);
 }
