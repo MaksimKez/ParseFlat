@@ -1,111 +1,129 @@
-using System.Net.Http.Json;
 using Application.Abstractions.UserService;
 using Application.Dtos;
-using Application.Dtos.Settings;
 using Application.Dtos.Users;
 using Application.Responses;
-using Microsoft.Extensions.Options;
+using Infrastructure.UserServiceClient.Interfaces;
 using Polly;
-using Polly.Retry;
+using Refit;
 
 namespace Infrastructure.UserServiceClient;
 
-public class UserServiceClient : IUserServiceClient
+public class UserServiceClient(
+    HttpClient httpClient,
+    ResiliencePipeline resiliencePipeline,
+    IUserServiceApi userServiceApi)
+    : BaseHttpService(httpClient, resiliencePipeline), IUserServiceClient
 {
-    private readonly HttpClient _httpClient;
-    private readonly ResiliencePipeline _retryPipeline;
-
-    public UserServiceClient(HttpClient httpClient, IOptions<UserProfileClientSettings> settingsOptions)
+    public async Task<UserServiceResult> FindByIdAsync(Guid id, CancellationToken ct = default)
     {
-        var settings = settingsOptions.Value;
-        
-        _httpClient = httpClient;
-        _httpClient.BaseAddress = new Uri(settings.BaseUrl);
+        try
+        {
+            var user = await ResiliencePipeline.ExecuteAsync(async token => 
+                await userServiceApi.GetByIdAsync(id, token), ct);
 
-        _retryPipeline = new ResiliencePipelineBuilder()
-            .AddRetry(new RetryStrategyOptions
+            return new UserServiceResult
             {
-                MaxRetryAttempts = settings.RetryCount,
-                Delay = TimeSpan.FromSeconds(settings.RetryDelaySeconds),
-                BackoffType = DelayBackoffType.Constant,
-                ShouldHandle = new PredicateBuilder()
-                    .Handle<HttpRequestException>()
-                    .Handle<TaskCanceledException>(),
-                })
-            .Build();
+                IsSuccess = true,
+                User = user
+            };
+        }
+        catch (ApiException apiEx)
+        {
+            return new UserServiceResult
+            {
+                IsSuccess = false,
+                ErrorMessage = FormatApiError(apiEx)
+            };
+        }
+        catch (Exception ex)
+        {
+            return new UserServiceResult
+            {
+                IsSuccess = false,
+                ErrorMessage = $"Unexpected error: {ex.Message}"
+            };
+        }
     }
 
-    public async Task<UserServiceResult> FindByIdAsync(Guid id, CancellationToken ct) =>
-        await _retryPipeline.ExecuteAsync(async token =>
+    public async Task<UserServiceResult> FindByEmailAsync(string email, CancellationToken ct = default)
+    {
+        try
         {
-            var response = await _httpClient.GetAsync($"{id}", token);
+            var user = await ResiliencePipeline.ExecuteAsync(async token => 
+                await userServiceApi.GetByEmailAsync(email, token), ct);
 
-            if (!response.IsSuccessStatusCode)
-            {
-                return new UserServiceResult
-                {
-                    IsSuccess = false,
-                    ErrorMessage = response.ReasonPhrase
-                };
-            }
-
-            var user = await response.Content.ReadFromJsonAsync<UserDto>(cancellationToken: token);
             return new UserServiceResult
             {
                 IsSuccess = true,
                 User = user
             };
-        }, ct);
-    
-    public async Task<UserServiceResult> FindByEmailAsync(string email, CancellationToken ct) =>
-        await _retryPipeline.ExecuteAsync(async token =>
+        }
+        catch (ApiException apiEx)
         {
-            var response = await _httpClient.GetAsync($"by-email?email={Uri.EscapeDataString(email)}", token);
-
-            if (!response.IsSuccessStatusCode)
+            return new UserServiceResult
             {
-                return new UserServiceResult
-                {
-                    IsSuccess = false,
-                    ErrorMessage = response.ReasonPhrase
-                };
-            }
+                IsSuccess = false,
+                ErrorMessage = FormatApiError(apiEx)
+            };
+        }
+        catch (Exception ex)
+        {
+            return new UserServiceResult
+            {
+                IsSuccess = false,
+                ErrorMessage = $"Unexpected error: {ex.Message}"
+            };
+        }
+    }
 
-            var user = await response.Content.ReadFromJsonAsync<UserDto>(cancellationToken: token);
+    public async Task<UserServiceResult> AddUserAsync(UserDto dto, CancellationToken ct = default)
+    {
+        try
+        {
+            var request = MapToAddUserRequest(dto);
+            var user = await ResiliencePipeline.ExecuteAsync(async token => 
+                await userServiceApi.AddUserAsync(request, token), ct);
+
             return new UserServiceResult
             {
                 IsSuccess = true,
                 User = user
             };
-        }, ct);
-
-    public async Task<UserServiceResult> AddUserAsync(UserDto dto, CancellationToken ct) =>
-        await _retryPipeline.ExecuteAsync(async token =>
+        }
+        catch (ApiException apiEx)
         {
-            var request = new AddUserProfileRequest
-            {
-                Email = dto.Email,
-                Id = dto.Id,
-                LastName = dto.LastName,
-                Name = dto.Name
-            };  
-            
-            var response = await _httpClient.PostAsJsonAsync(string.Empty, request, token);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                return new UserServiceResult
-                {
-                    IsSuccess = false,
-                    ErrorMessage = response.ReasonPhrase
-                };
-            }
-
-            var user = await response.Content.ReadFromJsonAsync<UserDto>(cancellationToken: token);
             return new UserServiceResult
             {
-                IsSuccess = true,
-                User = user
+                IsSuccess = false,
+                ErrorMessage = FormatApiError(apiEx)
             };
-        }, ct);
+        }
+        catch (Exception ex)
+        {
+            return new UserServiceResult
+            {
+                IsSuccess = false,
+                ErrorMessage = $"Unexpected error: {ex.Message}"
+            };
+        }
+    }
+
+    private static AddUserProfileRequest MapToAddUserRequest(UserDto dto)
+    {
+        return new AddUserProfileRequest
+        {
+            Email = dto.Email,
+            Id = dto.Id,
+            LastName = dto.LastName,
+            Name = dto.Name
+        };
+    }
+
+    private static string FormatApiError(ApiException apiEx)
+    {
+        var errorBody = apiEx.Content ?? string.Empty;
+        return string.IsNullOrWhiteSpace(errorBody)
+            ? $"HTTP {(int)apiEx.StatusCode} {apiEx.ReasonPhrase}"
+            : $"HTTP {(int)apiEx.StatusCode} {apiEx.ReasonPhrase}: {errorBody}";
+    }
 }
