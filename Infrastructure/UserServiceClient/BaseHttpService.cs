@@ -6,9 +6,6 @@ namespace Infrastructure.UserServiceClient;
 
 public abstract class BaseHttpService(HttpClient httpClient, ResiliencePipeline resiliencePipeline)
 {
-    protected readonly HttpClient HttpClient = httpClient;
-    protected readonly ResiliencePipeline ResiliencePipeline = resiliencePipeline;
-
     protected async Task<TResult> ExecuteGetAsync<TResult, TResponse>(
         string endpoint, 
         Func<TResponse?, TResult> onSuccess,
@@ -16,9 +13,9 @@ public abstract class BaseHttpService(HttpClient httpClient, ResiliencePipeline 
         CancellationToken cancellationToken = default)
         where TResponse : class
     {
-        return await ResiliencePipeline.ExecuteAsync(async token =>
+        return await resiliencePipeline.ExecuteAsync(async token =>
         {
-            var response = await HttpClient.GetAsync(endpoint, token);
+            var response = await httpClient.GetAsync(endpoint, token);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -45,9 +42,9 @@ public abstract class BaseHttpService(HttpClient httpClient, ResiliencePipeline 
         CancellationToken cancellationToken = default)
         where TResponse : class
     {
-        return await ResiliencePipeline.ExecuteAsync(async token =>
+        return await resiliencePipeline.ExecuteAsync(async token =>
         {
-            var response = await HttpClient.PostAsJsonAsync(endpoint, request, token);
+            var response = await httpClient.PostAsJsonAsync(endpoint, request, token);
 
             if (!response.IsSuccessStatusCode)
             {

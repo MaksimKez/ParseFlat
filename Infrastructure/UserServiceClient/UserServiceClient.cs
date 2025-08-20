@@ -18,7 +18,7 @@ public class UserServiceClient(
     {
         try
         {
-            var user = await ResiliencePipeline.ExecuteAsync(async token => 
+            var user = await resiliencePipeline.ExecuteAsync(async token => 
                 await userServiceApi.GetByIdAsync(id, token), ct);
 
             return new UserServiceResult
@@ -49,7 +49,7 @@ public class UserServiceClient(
     {
         try
         {
-            var user = await ResiliencePipeline.ExecuteAsync(async token => 
+            var user = await resiliencePipeline.ExecuteAsync(async token => 
                 await userServiceApi.GetByEmailAsync(email, token), ct);
 
             return new UserServiceResult
@@ -81,7 +81,7 @@ public class UserServiceClient(
         try
         {
             var request = MapToAddUserRequest(dto);
-            var user = await ResiliencePipeline.ExecuteAsync(async token => 
+            var user = await resiliencePipeline.ExecuteAsync(async token => 
                 await userServiceApi.AddUserAsync(request, token), ct);
 
             return new UserServiceResult

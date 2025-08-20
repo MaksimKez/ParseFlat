@@ -27,7 +27,6 @@ public static class InfrastructureDependencyInjection
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
-        // Регистрируем Refit клиент
         services.AddRefitClient<IUserServiceApi>()
             .ConfigureHttpClient((serviceProvider, client) =>
             {
@@ -35,7 +34,6 @@ public static class InfrastructureDependencyInjection
                 client.BaseAddress = new Uri(settings.BaseUrl);
             });
 
-        // Регистрируем HttpClient для BaseHttpService (если нужен)
         services.AddHttpClient<UserServiceClient.UserServiceClient>((serviceProvider, client) =>
         {
             var settings = serviceProvider.GetRequiredService<IOptions<UserProfileClientSettings>>().Value;
@@ -43,7 +41,6 @@ public static class InfrastructureDependencyInjection
             client.Timeout = TimeSpan.FromSeconds(settings.TimeoutSeconds);
         });
 
-        // Регистрируем ResiliencePipeline
         services.AddSingleton<ResiliencePipeline>(serviceProvider =>
         {
             var settings = serviceProvider.GetRequiredService<IOptions<UserProfileClientSettings>>().Value;
