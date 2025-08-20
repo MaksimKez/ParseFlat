@@ -1,5 +1,6 @@
 using Application.Abstractions.EmailService;
 using Application.Abstractions.Security;
+using Application.Abstractions.UserService;
 using Application.Responses;
 using Domain.Abstractions;
 using Domain.Entities;
@@ -11,18 +12,26 @@ public class EmailVerificationService(
     IUnitOfWork unitOfWork,
     ITokenGenerator tokenGenerator,
     IEmailService emailService,
+    IUserServiceClient userServiceClient,
     ILogger<EmailVerificationService> logger)
     : IEmailVerificationService
 {
 
     private const int emailVerificationTokeHours = 24; 
-    public async Task<SendVerificationLinkResult> SendVerificationLinkAsync(string email, CancellationToken cancellationToken)
+    public async Task<SendVerificationLinkResult> SendVerificationLinkAsync(string name, CancellationToken cancellationToken)
     {
-        var user = await unitOfWork.Users.FindByEmailAsync(email, cancellationToken);
+        var user = await unitOfWork.Users.FindByNameAsync(name, cancellationToken);
         if (user == null)
         {
-            logger.LogWarning("User with email {Email} not found", email);
+            logger.LogWarning("User with name {Name} not found", name);
             return SendVerificationLinkResult.Failure("User not found");
+        }
+        
+        var result = await userServiceClient.FindByIdAsync(user.Id, cancellationToken);
+        if (result.User is null)
+        {
+            logger.LogWarning("User with name {Name} not found", name);
+            return SendVerificationLinkResult.Failure(result.ErrorMessage!);
         }
 
         var token = tokenGenerator.GenerateToken();
@@ -36,16 +45,16 @@ public class EmailVerificationService(
 
         await unitOfWork.EmailVerificationTokens.AddAsync(emailVerification, cancellationToken);
 
-        var emailResult = await emailService.SendEmailAsync(user.Email, user.Name, token, cancellationToken);
+        var emailResult = await emailService.SendEmailAsync(result.User.Email, user.Name, token, cancellationToken);
 
         if (!emailResult.IsSuccess)
         {
-            logger.LogError("Failed to send verification email to {Email}", user.Email);
-            return SendVerificationLinkResult.Failure("Failed to send verification email");
+            logger.LogError("Failed to send verification name to {Email}", result.User.Email);
+            return SendVerificationLinkResult.Failure("Failed to send verification name");
         }
 
         SimulateEmailSent(token);
-        logger.LogInformation("Verification email sent to {Email}", user.Email);
+        logger.LogInformation("Verification name sent to {Email}", result.User.Email);
         return SendVerificationLinkResult.Success();
     }
 

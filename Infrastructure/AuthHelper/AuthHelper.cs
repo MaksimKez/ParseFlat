@@ -25,7 +25,7 @@ public class AuthHelper(IOptions<AuthOptions> authOptions) : IAuthHelper
             : AuthHelperResult.Success(refreshToken);
     }
 
-    public AuthHelperResult GetEmailFromToken(string token)
+    public AuthHelperResult GetNameFromToken(string token)
     {
         if (string.IsNullOrWhiteSpace(token))
             return AuthHelperResult.Failure(authOptions.Messages.RefreshTokenMissing);
@@ -34,11 +34,11 @@ public class AuthHelper(IOptions<AuthOptions> authOptions) : IAuthHelper
         {
             var handler = new JwtSecurityTokenHandler();
             var jwtToken = handler.ReadJwtToken(token);
-            var emailClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == authOptions.Jwt.EmailClaimType);
+            var nameClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == authOptions.Jwt.NameClaimType);
 
-            return emailClaim == null 
-                ? AuthHelperResult.Failure(authOptions.Messages.EmailNotFoundInToken)
-                : AuthHelperResult.Success(emailClaim.Value);
+            return nameClaim == null 
+                ? AuthHelperResult.Failure(authOptions.Messages.NameNotFoundInToken)
+                : AuthHelperResult.Success(nameClaim.Value);
         }
         catch (Exception ex)
         {

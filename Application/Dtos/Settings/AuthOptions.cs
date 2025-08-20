@@ -19,6 +19,7 @@ public class AuthOptions
     public class JwtSettings
     {
         public string EmailClaimType { get; set; } = "email";
+        public string NameClaimType { get; set; } = "name";
     }
 
     public class MessageSettings
@@ -31,5 +32,6 @@ public class AuthOptions
         public string RefreshTokenNotFound { get; set; } = "Refresh token not found in cookies";
         public string EmailNotFoundInToken { get; set; } = "Email not found in token";
         public string InvalidTokenFormat { get; set; } = "Invalid token format";
+        public string NameNotFoundInToken { get; set; } = "Name not found in token";
     }
 }
