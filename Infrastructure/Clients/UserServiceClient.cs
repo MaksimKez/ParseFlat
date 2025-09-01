@@ -2,11 +2,11 @@ using Application.Abstractions.UserService;
 using Application.Dtos;
 using Application.Dtos.Users;
 using Application.Responses;
-using Infrastructure.UserServiceClient.Interfaces;
+using Infrastructure.Clients.Interfaces;
 using Polly;
 using Refit;
 
-namespace Infrastructure.UserServiceClient;
+namespace Infrastructure.Clients;
 
 public class UserServiceClient(
     HttpClient httpClient,

@@ -1,7 +1,7 @@
 using System.Net.Http.Json;
 using Polly;
 
-namespace Infrastructure.UserServiceClient;
+namespace Infrastructure.Clients;
 
 
 public abstract class BaseHttpService(HttpClient httpClient, ResiliencePipeline resiliencePipeline)

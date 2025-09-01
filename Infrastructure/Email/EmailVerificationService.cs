@@ -1,6 +1,7 @@
 using Application.Abstractions.EmailService;
 using Application.Abstractions.Security;
 using Application.Abstractions.UserService;
+using Application.Dtos;
 using Application.Responses;
 using Domain.Abstractions;
 using Domain.Entities;
@@ -11,7 +12,7 @@ namespace Infrastructure.Email;
 public class EmailVerificationService(
     IUnitOfWork unitOfWork,
     ITokenGenerator tokenGenerator,
-    IEmailService emailService,
+    INotificationServiceClient notificationServiceClient,
     IUserServiceClient userServiceClient,
     ILogger<EmailVerificationService> logger)
     : IEmailVerificationService
@@ -45,7 +46,12 @@ public class EmailVerificationService(
 
         await unitOfWork.EmailVerificationTokens.AddAsync(emailVerification, cancellationToken);
 
-        var emailResult = await emailService.SendEmailAsync(result.User.Email, user.Name, token, cancellationToken);
+        var emailResult = await notificationServiceClient.SendEmailAsync(new EmailCodeDto
+        {
+            ToEmail = result.User.Email,
+            ToName = user.Name,
+            Token = token
+        }, cancellationToken);
 
         if (!emailResult.IsSuccess)
         {
