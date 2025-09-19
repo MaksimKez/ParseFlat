@@ -1,6 +1,6 @@
 using Application.Abstractions.EmailService;
 using Application.Dtos;
-using Application.Responses.Infrastructure;
+using Application.Responses;
 using Infrastructure.Clients.Interfaces;
 using Polly;
 using Refit;
@@ -13,34 +13,22 @@ public class NotificationServiceClient(
     INotificationServiceApi notificationServiceApi)
     : BaseHttpService(httpClient, resiliencePipeline), INotificationServiceClient
 {
-    public async Task<EmailServiceResult> SendEmailAsync(EmailCodeDto dto, CancellationToken cancellationToken = default)
+    public async Task<Result> SendEmailAsync(EmailCodeDto dto, CancellationToken cancellationToken = default)
     {
         try
         {
             await resiliencePipeline.ExecuteAsync(async token =>
                 await notificationServiceApi.SendVerificationCode(dto), cancellationToken);
 
-            return new EmailServiceResult
-            {
-                IsSuccess = true,
-                ErrorMessage = null
-            };
+            return Result.Success();
         }
         catch (ApiException apiEx)
         {
-            return new EmailServiceResult
-            {
-                IsSuccess = false,
-                ErrorMessage = FormatApiError(apiEx)
-            };
+            return Result.Failure(FormatApiError(apiEx));
         }
         catch (Exception e)
         {
-            return new EmailServiceResult
-            {
-                IsSuccess = false,
-                ErrorMessage = $"Unexpected error: {e.Message}"
-            };
+            return Result.Failure($"Unexpected error: {e.Message}");
         }
     }
     

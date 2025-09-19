@@ -4,4 +4,4 @@ using Application.Responses;
 
 namespace Application.Commands.ResetPassword;
 
-public record ResetPasswordCommand(ResetPasswordRequest Request) : ITransactionalCommand<PasswordResetResult>;
+public record ResetPasswordCommand(ResetPasswordRequest Request) : ITransactionalCommand<Result>;

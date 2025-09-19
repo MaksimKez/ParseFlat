@@ -21,27 +21,15 @@ public class UserServiceClient(
             var user = await resiliencePipeline.ExecuteAsync(async token => 
                 await userServiceApi.GetByIdAsync(id, token), ct);
 
-            return new UserServiceResult
-            {
-                IsSuccess = true,
-                User = user
-            };
+            return UserServiceResult.Success(user);
         }
         catch (ApiException apiEx)
         {
-            return new UserServiceResult
-            {
-                IsSuccess = false,
-                ErrorMessage = FormatApiError(apiEx)
-            };
+            return (UserServiceResult)Result.Failure(FormatApiError(apiEx));
         }
         catch (Exception ex)
         {
-            return new UserServiceResult
-            {
-                IsSuccess = false,
-                ErrorMessage = $"Unexpected error: {ex.Message}"
-            };
+            return (UserServiceResult)Result.Failure($"Unexpected error: {ex.Message}");
         }
     }
 
@@ -52,27 +40,15 @@ public class UserServiceClient(
             var user = await resiliencePipeline.ExecuteAsync(async token => 
                 await userServiceApi.GetByEmailAsync(email, token), ct);
 
-            return new UserServiceResult
-            {
-                IsSuccess = true,
-                User = user
-            };
+            return UserServiceResult.Success(user);
         }
         catch (ApiException apiEx)
         {
-            return new UserServiceResult
-            {
-                IsSuccess = false,
-                ErrorMessage = FormatApiError(apiEx)
-            };
+            return (UserServiceResult)Result.Failure(FormatApiError(apiEx));
         }
         catch (Exception ex)
         {
-            return new UserServiceResult
-            {
-                IsSuccess = false,
-                ErrorMessage = $"Unexpected error: {ex.Message}"
-            };
+            return (UserServiceResult)Result.Failure($"Unexpected error: {ex.Message}");
         }
     }
 
@@ -84,27 +60,15 @@ public class UserServiceClient(
             var user = await resiliencePipeline.ExecuteAsync(async token => 
                 await userServiceApi.AddUserAsync(request, token), ct);
 
-            return new UserServiceResult
-            {
-                IsSuccess = true,
-                User = user
-            };
+            return UserServiceResult.Success(user);
         }
         catch (ApiException apiEx)
         {
-            return new UserServiceResult
-            {
-                IsSuccess = false,
-                ErrorMessage = FormatApiError(apiEx)
-            };
+            return (UserServiceResult)Result.Failure(FormatApiError(apiEx));
         }
         catch (Exception ex)
         {
-            return new UserServiceResult
-            {
-                IsSuccess = false,
-                ErrorMessage = $"Unexpected error: {ex.Message}"
-            };
+            return (UserServiceResult)Result.Failure($"Unexpected error: {ex.Message}");
         }
     }
 

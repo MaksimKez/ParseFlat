@@ -1,11 +1,11 @@
 using Application.Dtos;
-using Application.Responses.Infrastructure;
+using Application.Responses;
 
 namespace Application.Abstractions.EmailService;
 
 public interface INotificationServiceClient
 {
-    Task<EmailServiceResult> SendEmailAsync(
+    Task<Result> SendEmailAsync(
         EmailCodeDto dto,
         CancellationToken cancellationToken = default);
 }

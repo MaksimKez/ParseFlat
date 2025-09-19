@@ -19,21 +19,21 @@ public class VerificationService(
 {
 
     private const int emailVerificationTokeHours = 24; 
-    public async Task<SendVerificationLinkResult> SendVerificationLinkAsync(string name, bool isEmailVerification,
+    public async Task<Result> SendVerificationLinkAsync(string name, bool isEmailVerification,
                                                         CancellationToken cancellationToken)
     {
         var user = await unitOfWork.Users.FindByNameAsync(name, cancellationToken);
         if (user == null)
         {
             logger.LogWarning("User with name {Name} not found", name);
-            return SendVerificationLinkResult.Failure("User not found");
+            return Result.Failure("User not found");
         }
 
         var result = await userServiceClient.FindByIdAsync(user.Id, cancellationToken);
         if (result.User is null)
         {
             logger.LogWarning("User with name {Name} not found", name);
-            return SendVerificationLinkResult.Failure(result.ErrorMessage!);
+            return Result.Failure(result.ErrorMessage!);
         }
         
         var token = tokenGenerator.GenerateToken();
@@ -57,11 +57,11 @@ public class VerificationService(
         if (!emailResult.IsSuccess)
         {
             logger.LogError("Failed to send verification name to {Email}", result.User.Email);
-            return SendVerificationLinkResult.Failure("Failed to send verification name");
+            return Result.Failure("Failed to send verification name");
         }
 
         logger.LogInformation("Verification name sent to {Email}", result.User.Email);
-        return SendVerificationLinkResult.Success();
+        return Result.Success();
     }
 
     private async Task CreateEmailVerificationTokenAsync(Guid userId, string token, CancellationToken cancellationToken)

@@ -2,9 +2,9 @@ using Application.Dtos.Users;
 
 namespace Application.Responses;
 
-public class UserServiceResult : IResult
+public class UserServiceResult : Result
 {
-    public bool IsSuccess { get; init; }
-    public string? ErrorMessage { get; init; }
     public UserDto? User { get; set; }
+    
+    public static UserServiceResult Success(UserDto user) => new() { IsSuccess = true, User = user };
 }

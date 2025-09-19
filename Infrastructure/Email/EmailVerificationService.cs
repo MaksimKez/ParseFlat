@@ -19,20 +19,20 @@ public class EmailVerificationService(
 {
 
     private const int emailVerificationTokeHours = 24; 
-    public async Task<SendVerificationLinkResult> SendVerificationLinkAsync(string name, CancellationToken cancellationToken)
+    public async Task<Result> SendVerificationLinkAsync(string name, CancellationToken cancellationToken)
     {
         var user = await unitOfWork.Users.FindByNameAsync(name, cancellationToken);
         if (user == null)
         {
             logger.LogWarning("User with name {Name} not found", name);
-            return SendVerificationLinkResult.Failure("User not found");
+            return Result.Failure("User not found");
         }
         
         var result = await userServiceClient.FindByIdAsync(user.Id, cancellationToken);
         if (result.User is null)
         {
             logger.LogWarning("User with name {Name} not found", name);
-            return SendVerificationLinkResult.Failure(result.ErrorMessage!);
+            return Result.Failure(result.ErrorMessage!);
         }
 
         var token = tokenGenerator.GenerateToken();
@@ -56,15 +56,15 @@ public class EmailVerificationService(
         if (!emailResult.IsSuccess)
         {
             logger.LogError("Failed to send verification name to {Email}", result.User.Email);
-            return SendVerificationLinkResult.Failure("Failed to send verification name");
+            return Result.Failure("Failed to send verification name");
         }
 
         SimulateEmailSent(token);
         logger.LogInformation("Verification name sent to {Email}", result.User.Email);
-        return SendVerificationLinkResult.Success();
+        return Result.Success();
     }
 
-    public async Task<VerifyEmailResult> VerifyEmailAsync(string tokenValue, CancellationToken cancellationToken)
+    public async Task<Result> VerifyEmailAsync(string tokenValue, CancellationToken cancellationToken)
     {
         var verification = await unitOfWork.EmailVerificationTokens
                                             .FindByTokenAsync(tokenValue, cancellationToken);
@@ -72,27 +72,27 @@ public class EmailVerificationService(
         if (verification is null)
         {
             logger.LogWarning("Verification token not found: {Token}", tokenValue);
-            return VerifyEmailResult.Failure("Invalid or expired token.");
+            return Result.Failure("Invalid or expired token.");
         }
 
         if (verification.IsUsed || verification.ExpiresAt < DateTime.UtcNow)
         {
             logger.LogWarning("Verification token expired or already used: {Token}", tokenValue);
-            return VerifyEmailResult.Failure("Token expired or already used.");
+            return Result.Failure("Token expired or already used.");
         }
 
         var user = verification.User;
         if (user is null)
         {
             logger.LogError("User not loaded for token: {Token}", tokenValue);
-            return VerifyEmailResult.Failure("User data missing.");
+            return Result.Failure("User data missing.");
         }
 
         user.IsVerified = true;
         verification.IsUsed = true;
 
         logger.LogInformation("User {UserId} successfully verified email", user.Id);
-        return VerifyEmailResult.Success();
+        return Result.Success();
     }
 
     private void SimulateEmailSent(string token)

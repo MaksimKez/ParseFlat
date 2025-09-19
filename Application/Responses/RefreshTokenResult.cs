@@ -1,11 +1,11 @@
 namespace Application.Responses;
 
-public class RefreshTokenResult : IResult
-{
-    public bool IsSuccess { get; init; }
-    public string? ErrorMessage { get; init; }
-    public string? Token { get; init; }
+public class RefreshTokenResult : Result
+{ 
+    public string? Token { get; private init; }
     
-    public static RefreshTokenResult Success(string token) => new RefreshTokenResult { IsSuccess = true, Token = token };
-    public static RefreshTokenResult Failure(string errorMessage) => new RefreshTokenResult { IsSuccess = false, ErrorMessage = errorMessage };
+    public static RefreshTokenResult Success(string token) 
+        => new() { IsSuccess = true, Token = token };
+    public new static RefreshTokenResult Failure(string errorMessage)
+        => new() { IsSuccess = false, ErrorMessage = errorMessage };
 }

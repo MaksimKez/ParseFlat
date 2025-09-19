@@ -1,28 +1,26 @@
 namespace Application.Responses;
 
-public class RegisterUserResult : IResult
+public class RegisterUserResult : Result
 {
-    public Guid RegisteredUserId { get; set; }
-    public bool IsSuccess { get; init; }
-    public string? ErrorMessage { get; init; }
-
-    public RegisterUserResult(Guid registeredUserId, bool isSuccess, string? errorMessage)
-    {
-        RegisteredUserId = registeredUserId;
-        IsSuccess = isSuccess;
-        ErrorMessage = errorMessage;
-    }
-
-    public RegisterUserResult()
-    { }
+    public Guid RegisteredUserId { get; private init; }
 
     public static RegisterUserResult Success(Guid registeredUserId)
     {
-        return new RegisterUserResult(registeredUserId, true, null);
+        return new RegisterUserResult
+        {
+            RegisteredUserId = registeredUserId,
+            ErrorMessage = null,
+            IsSuccess = true
+        };
     }
 
-    public static RegisterUserResult Failure(string? errorMessage)
+    public new static RegisterUserResult Failure(string? errorMessage)
     {
-        return new RegisterUserResult(Guid.Empty, false, errorMessage);
+        return new RegisterUserResult
+        {
+            ErrorMessage = errorMessage,
+            IsSuccess = false,
+            RegisteredUserId = Guid.Empty
+        };
     }
 }
