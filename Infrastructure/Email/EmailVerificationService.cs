@@ -59,7 +59,6 @@ public class EmailVerificationService(
             return Result.Failure("Failed to send verification name");
         }
 
-        SimulateEmailSent(token);
         logger.LogInformation("Verification name sent to {Email}", result.User.Email);
         return Result.Success();
     }
@@ -93,12 +92,5 @@ public class EmailVerificationService(
 
         logger.LogInformation("User {UserId} successfully verified email", user.Id);
         return Result.Success();
-    }
-
-    private void SimulateEmailSent(string token)
-    {
-        Console.WriteLine(token);
-        Console.WriteLine(token);
-        Console.WriteLine(token);
     }
 }

@@ -25,12 +25,7 @@ public abstract class BaseHttpService(HttpClient httpClient, ResiliencePipeline 
 
             var data = await response.Content.ReadFromJsonAsync<TResponse>(cancellationToken: token);
             
-            if (data == null)
-            {
-                return onError("Response body is null", (int)response.StatusCode);
-            }
-
-            return onSuccess(data);
+            return data is null ? onError("Response body is null", (int)response.StatusCode) : onSuccess(data);
         }, cancellationToken);
     }
 
@@ -54,12 +49,7 @@ public abstract class BaseHttpService(HttpClient httpClient, ResiliencePipeline 
 
             var data = await response.Content.ReadFromJsonAsync<TResponse>(cancellationToken: token);
             
-            if (data == null)
-            {
-                return onError("Response body is null", (int)response.StatusCode);
-            }
-
-            return onSuccess(data);
+            return data is null ? onError("Response body is null", (int)response.StatusCode) : onSuccess(data);
         }, cancellationToken);
     }
 
