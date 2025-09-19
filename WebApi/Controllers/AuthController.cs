@@ -1,4 +1,3 @@
-using Application.Abstractions.AuthHelper;
 using Application.Commands.LoginUserCommand;
 using Application.Commands.RefreshAccessToken;
 using Application.Commands.RegisterUser;
@@ -12,53 +11,60 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using WebApi.Helpers.Interfaces;
 
 namespace WebApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AuthController(IMediator mediator, IAuthHelper authHelper, IOptions<AuthOptions> options) : ControllerBase
+public class AuthController(
+    IMediator mediator,
+    IOptions<AuthOptions> options,
+    ILogger<AuthController> logger,
+    IAuthControllerHelper helper)
+    : ControllerBase
 {
-    private readonly AuthOptions authOptions = options.Value;
-    
-    [HttpPost("register")]
-    [ProducesResponseType(StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> RegisterUser([FromBody] RegisterUserRequest registerUserRequest)
-    {
-        var result = await mediator.Send(new RegisterUserCommand(registerUserRequest));
+    private readonly AuthOptions _authOptions = options.Value;
 
-        return result.IsSuccess
-            ? CreatedAtAction(nameof(RegisterUser), new { id = result.RegisteredUserId }, null)
-            : BadRequest(result.ErrorMessage);
+    [HttpPost("register")]
+    public async Task<IActionResult> RegisterUser([FromBody] RegisterUserRequest registerUserRequest, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new RegisterUserCommand(registerUserRequest), cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            logger.LogInformation("User registered successfully with Id {UserId}", result.RegisteredUserId);
+            return CreatedAtAction(nameof(RegisterUser), new { id = result.RegisteredUserId }, null);
+        }
+
+        logger.LogWarning("User registration failed: {Error}", result.ErrorMessage);
+        return BadRequest(result.ErrorMessage);
     }
 
     [HttpPost("login")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Login([FromBody] LoginUserRequest loginUserRequest)
+    public async Task<IActionResult> Login([FromBody] LoginUserRequest loginUserRequest, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new LoginUserCommand(loginUserRequest));
+        var result = await mediator.Send(new LoginUserCommand(loginUserRequest), cancellationToken);
 
         if (!result.IsSuccess)
+        {
+            logger.LogWarning("Login failed for {Name}: {Error}", loginUserRequest.Name, result.ErrorMessage);
             return BadRequest(result.ErrorMessage);
+        }
 
-        SetRefreshTokenCookie(result.RefreshToken);
+        helper.SetRefreshTokenCookie(Response, result.RefreshToken);
+        logger.LogInformation("User {Name} logged in successfully", loginUserRequest.Name);
 
         return Ok(new { accessToken = result.AccessToken });
     }
 
     [HttpPost("refresh")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> RefreshToken()
+    public async Task<IActionResult> RefreshToken(CancellationToken cancellationToken)
     {
-        var refreshTokenResult = authHelper.GetRefreshToken(Request.Cookies);
+        if (!helper.TryGetRefreshToken(Request.Cookies, out var refreshToken, out var error, this))
+            return error!;
 
-        if (!refreshTokenResult.IsSuccess)
-            return BadRequest(refreshTokenResult.ErrorMessage);
-
-        var result = await mediator.Send(new RefreshAccessTokenCommand(refreshTokenResult.Value!));
+        var result = await mediator.Send(new RefreshAccessTokenCommand(refreshToken!), cancellationToken);
 
         return result.IsSuccess
             ? Ok(new { accessToken = result.Token })
@@ -67,67 +73,46 @@ public class AuthController(IMediator mediator, IAuthHelper authHelper, IOptions
 
     [Authorize]
     [HttpPost("sendverificationlink")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> SendVerificationLink(bool isEmailVerification)
+    public async Task<IActionResult> SendVerificationLink(bool isEmailVerification, CancellationToken cancellationToken)
     {
-        var refreshTokenResult = authHelper.GetRefreshToken(Request.Cookies);
+        if (!helper.TryGetRefreshToken(Request.Cookies, out var refreshToken, out var error, this))
+            return error!;
 
-        if (!refreshTokenResult.IsSuccess || refreshTokenResult.Value == null)
-            return BadRequest(refreshTokenResult.ErrorMessage);
+        if (!helper.TryGetNameFromToken(refreshToken!, out var name, out error, this))
+            return error!;
 
-        var nameResult = authHelper.GetNameFromToken(refreshTokenResult.Value);
-
-        if (!nameResult.IsSuccess)
-            return BadRequest(nameResult.ErrorMessage);
-
-        var result = await mediator.Send(new SendVerificationLinkCommand(nameResult.Value!, isEmailVerification));
+        var result = await mediator.Send(new SendVerificationLinkCommand(name!, isEmailVerification), cancellationToken);
 
         if (result.IsSuccess)
         {
-            Response.Cookies.Delete(authOptions.Cookie.RefreshTokenName);
-            return Ok(authOptions.Messages.VerificationLinkSent);
+            helper.RemoveRefreshTokenCookie(Response);
+            return Ok(_authOptions.Messages.VerificationLinkSent);
         }
 
+        logger.LogWarning("Send verification link failed: {Error}", result.ErrorMessage);
         return BadRequest(result.ErrorMessage);
     }
 
     [HttpPost("verifyemail")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> VerifyEmail([FromQuery] string token)
+    public async Task<IActionResult> VerifyEmail([FromQuery] string token, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(token))
-            return BadRequest(authOptions.Messages.VerificationTokenMissing);
+            return BadRequest(_authOptions.Messages.VerificationTokenMissing);
 
-        var result = await mediator.Send(new VerifyEmailCommand(token));
+        var result = await mediator.Send(new VerifyEmailCommand(token), cancellationToken);
 
         return result.IsSuccess
-            ? Ok(authOptions.Messages.EmailVerified)
+            ? Ok(_authOptions.Messages.EmailVerified)
             : BadRequest(result.ErrorMessage);
     }
 
     [HttpPost("changepassword")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> ChangePassword([FromBody] ResetPasswordRequest resetPasswordRequest)
+    public async Task<IActionResult> ChangePassword([FromBody] ResetPasswordRequest resetPasswordRequest, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new ResetPasswordCommand(resetPasswordRequest));
-        
+        var result = await mediator.Send(new ResetPasswordCommand(resetPasswordRequest), cancellationToken);
+
         return result.IsSuccess
-            ? Ok(authOptions.Messages.PasswordChanged)
+            ? Ok(_authOptions.Messages.PasswordChanged)
             : BadRequest(result.ErrorMessage);
     }
-
-    private void SetRefreshTokenCookie(string token)
-    {
-        Response.Cookies.Append(authOptions.Cookie.RefreshTokenName, token, new CookieOptions
-        {
-            HttpOnly = authOptions.Cookie.HttpOnly,
-            Secure = authOptions.Cookie.Secure,
-            SameSite = SameSiteMode.Lax,
-            Expires = DateTime.UtcNow.AddHours(authOptions.Cookie.ExpirationHours)
-        });
-    }
 }
-

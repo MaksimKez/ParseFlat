@@ -7,10 +7,11 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Persistence;
+using WebApi.Helpers;
+using WebApi.Helpers.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//temporary
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(nameof(JwtOptions)));
 builder.Services.Configure<AuthOptions>(
     builder.Configuration.GetSection(AuthOptions.SectionName));
@@ -20,6 +21,8 @@ builder.Services.Configure<NotificationClientSettings>(builder.Configuration.Get
 builder.Services.AddInfrastructure();
 builder.Services.AddPersistence(builder.Configuration);
 builder.Services.AddApplication();
+
+builder.Services.AddScoped<IAuthControllerHelper, AuthControllerHelper>();
 
 builder.Services.AddEndpointsApiExplorer();
 
