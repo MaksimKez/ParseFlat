@@ -109,7 +109,7 @@ public class AuthController(
     [HttpPost("changepassword")]
     public async Task<IActionResult> ChangePassword([FromBody] ResetPasswordRequest resetPasswordRequest, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new ResetPasswordCommand(resetPasswordRequest), cancellationToken);
+        var result = await mediator.Send(new PasswordResetCommand(resetPasswordRequest), cancellationToken);
 
         return result.IsSuccess
             ? Ok(_authOptions.Messages.PasswordChanged)
