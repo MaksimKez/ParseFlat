@@ -12,5 +12,4 @@ public class NotificationClientSettings
     public int CircuitBreakerFailureThreshold { get; set; } = 5;
     public int CircuitBreakerBreakDurationSeconds { get; set; } = 30;
     public bool UseJitter { get; set; } = true;
-
 }
