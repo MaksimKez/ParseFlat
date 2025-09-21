@@ -1,3 +1,4 @@
+using System.Threading.Channels;
 using Application.Abstractions.AuthHelper;
 using Application.Dtos.Settings;
 using Application.Responses;
@@ -44,5 +45,31 @@ public class AuthHelper(IOptions<AuthOptions> authOptions) : IAuthHelper
         {
             return AuthHelperResult.Failure(authOptions.Messages.InvalidTokenFormat);
         }
+    }
+
+    public Guid GetIdFromToken(string token)
+    {
+        if (string.IsNullOrWhiteSpace(token))
+            return Guid.Empty;
+
+        try
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var jwtToken = handler.ReadJwtToken(token);
+            var idClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub);
+
+            Console.WriteLine(idClaim);
+            Console.WriteLine(idClaim);
+            Console.WriteLine(idClaim);
+            Console.WriteLine(idClaim);
+
+            return idClaim == null 
+                ? Guid.Empty 
+                : Guid.Parse(idClaim.Value);
+        }
+        catch (Exception ex)
+        {
+            return Guid.Empty;
+        }     
     }
 }

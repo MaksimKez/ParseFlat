@@ -6,4 +6,5 @@ public interface IAuthHelper
 {
     AuthHelperResult GetRefreshToken(IEnumerable<KeyValuePair<string, string>> valuePairs);
     AuthHelperResult GetNameFromToken(string token);
+    Guid GetIdFromToken(string token);
 }

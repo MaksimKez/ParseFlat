@@ -19,6 +19,7 @@ namespace WebApi.Controllers;
 [Route("api/[controller]")]
 public class AuthController(IMediator mediator, IAuthHelper authHelper, IOptions<AuthOptions> options) : ControllerBase
 {
+    private const string GetCreatedProfileUrl = "http://localhost:5010/api/UserProfile/";
     private readonly AuthOptions authOptions = options.Value;
     
     [HttpPost("register")]
@@ -29,7 +30,7 @@ public class AuthController(IMediator mediator, IAuthHelper authHelper, IOptions
         var result = await mediator.Send(new RegisterUserCommand(registerUserRequest));
 
         return result.IsSuccess
-            ? CreatedAtAction(nameof(RegisterUser), new { id = result.RegisteredUserId }, null)
+            ? Created(GetCreatedProfileUrl + result.RegisteredUserId, null)
             : BadRequest(result.ErrorMessage);
     }
 
@@ -117,6 +118,18 @@ public class AuthController(IMediator mediator, IAuthHelper authHelper, IOptions
         return result.IsSuccess
             ? Ok(authOptions.Messages.PasswordChanged)
             : BadRequest(result.ErrorMessage);
+    }
+    
+    [Authorize]
+    [HttpGet("get-my-id")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public IActionResult MyId()
+    {
+        var token = HttpContext.Request.Headers.Authorization.FirstOrDefault(x => x.StartsWith("Bearer ")).Split(" ")[1];
+
+        var id = authHelper.GetIdFromToken(token);
+
+        return Ok(id);
     }
 
     private void SetRefreshTokenCookie(string token)
