@@ -20,6 +20,18 @@ builder.Services.AddInfrastructure();
 builder.Services.AddPersistence(builder.Configuration);
 builder.Services.AddApplication();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("ReactLocalhost",
+        builder =>
+        {
+            builder.WithOrigins("http://localhost:3000")
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+        });
+});
+
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -93,8 +105,9 @@ if (app.Environment.IsDevelopment())
 }
 
 
-
 app.UseHttpsRedirection();
+
+app.UseCors("ReactLocalhost");
 
 app.UseAuthorization();
 

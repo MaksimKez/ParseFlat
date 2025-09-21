@@ -57,7 +57,7 @@ public static class InfrastructureDependencyInjection
                         .Handle<TaskCanceledException>()
                         .Handle<TimeoutRejectedException>()
                 })
-                .AddCircuitBreaker(new CircuitBreakerStrategyOptions
+                /*.AddCircuitBreaker(new CircuitBreakerStrategyOptions
                 {
                     FailureRatio = 0.5,
                     SamplingDuration = TimeSpan.FromSeconds(10),
@@ -67,7 +67,7 @@ public static class InfrastructureDependencyInjection
                         .Handle<HttpRequestException>()
                         .Handle<TaskCanceledException>()
                         .Handle<TimeoutRejectedException>()
-                })
+                })*/
                 .AddTimeout(TimeSpan.FromSeconds(settings.TimeoutSeconds))
                 .Build();
         });
