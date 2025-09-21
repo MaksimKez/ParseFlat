@@ -72,25 +72,22 @@ public class AuthController(IMediator mediator, IAuthHelper authHelper, IOptions
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> SendVerificationLink(bool isEmailVerification)
     {
-        var refreshTokenResult = authHelper.GetRefreshToken(Request.Cookies);
-
-        if (!refreshTokenResult.IsSuccess || refreshTokenResult.Value == null)
-            return BadRequest(refreshTokenResult.ErrorMessage);
-
-        var nameResult = authHelper.GetNameFromToken(refreshTokenResult.Value);
+        var token = HttpContext.Request.Headers.Authorization.FirstOrDefault(x => x.StartsWith("Bearer ")).Split(" ")[1];
+        
+        var nameResult = authHelper.GetNameFromToken(token);
 
         if (!nameResult.IsSuccess)
-            return BadRequest(nameResult.ErrorMessage);
+            return BadRequest(new object[] {nameResult.ErrorMessage});
 
         var result = await mediator.Send(new SendVerificationLinkCommand(nameResult.Value!, isEmailVerification));
 
         if (result.IsSuccess)
         {
             Response.Cookies.Delete(authOptions.Cookie.RefreshTokenName);
-            return Ok(authOptions.Messages.VerificationLinkSent);
+            return Ok(new object[] {authOptions.Messages.VerificationLinkSent});
         }
 
-        return BadRequest(result.ErrorMessage);
+        return BadRequest(new object[] {result.ErrorMessage});
     }
 
     [HttpPost("verifyemail")]
