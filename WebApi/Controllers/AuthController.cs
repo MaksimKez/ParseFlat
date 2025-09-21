@@ -67,7 +67,7 @@ public class AuthController(IMediator mediator, IAuthHelper authHelper, IOptions
     }
 
     [Authorize]
-    [HttpPost("sendverificationlink")]
+    [HttpGet("sendverificationlink")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> SendVerificationLink(bool isEmailVerification)
@@ -137,8 +137,9 @@ public class AuthController(IMediator mediator, IAuthHelper authHelper, IOptions
         Response.Cookies.Append(authOptions.Cookie.RefreshTokenName, token, new CookieOptions
         {
             HttpOnly = authOptions.Cookie.HttpOnly,
+            //frontend is on HTTP localhost:3000
             Secure = authOptions.Cookie.Secure,
-            SameSite = SameSiteMode.Lax,
+            SameSite = SameSiteMode.None,
             Expires = DateTime.UtcNow.AddHours(authOptions.Cookie.ExpirationHours)
         });
     }
