@@ -24,6 +24,15 @@ builder.Services.AddApplication();
 
 builder.Services.AddScoped<IAuthControllerHelper, AuthControllerHelper>();
 
+builder.Services.AddCors(c =>
+{
+    c.AddPolicy("AllowAll", policy =>
+        policy.AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials());
+});
+
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -96,7 +105,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-
+app.UseCors("AllowAll");
 
 app.UseHttpsRedirection();
 
