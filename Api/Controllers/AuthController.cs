@@ -1,3 +1,4 @@
+using Api.Helpers.Interfaces;
 using Application.Commands.LoginUserCommand;
 using Application.Commands.RefreshAccessToken;
 using Application.Commands.RegisterUser;
@@ -11,9 +12,8 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using WebApi.Helpers.Interfaces;
 
-namespace WebApi.Controllers;
+namespace Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]

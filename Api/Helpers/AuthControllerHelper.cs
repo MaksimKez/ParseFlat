@@ -1,10 +1,10 @@
+using Api.Helpers.Interfaces;
 using Application.Abstractions.AuthHelper;
 using Application.Dtos.Settings;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using WebApi.Helpers.Interfaces;
 
-namespace WebApi.Helpers;
+namespace Api.Helpers;
 
 public class AuthControllerHelper(IAuthHelper authHelper, IOptions<AuthOptions> options) : IAuthControllerHelper
 {

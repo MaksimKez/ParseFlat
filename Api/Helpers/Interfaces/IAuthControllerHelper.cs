@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace WebApi.Helpers.Interfaces;
+namespace Api.Helpers.Interfaces;
 
 public interface IAuthControllerHelper
 {

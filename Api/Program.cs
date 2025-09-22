@@ -7,8 +7,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Persistence;
-using WebApi.Helpers;
-using WebApi.Helpers.Interfaces;
+using Api.Helpers;
+using Api.Helpers.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
