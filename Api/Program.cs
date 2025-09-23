@@ -9,6 +9,7 @@ using Microsoft.OpenApi.Models;
 using Persistence;
 using Api.Helpers;
 using Api.Helpers.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -100,7 +101,7 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<UserServiceDbContext>();
+    var db = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
     db.Database.Migrate();
 }
 
