@@ -27,8 +27,8 @@ builder.Services.AddScoped<IAuthControllerHelper, AuthControllerHelper>();
 
 builder.Services.AddCors(c =>
 {
-    c.AddPolicy("AllowAll", policy =>
-        policy.AllowAnyOrigin()
+    c.AddPolicy("AllowFrontend", policy =>
+        policy.WithOrigins("http://localhost:3000")
             .AllowAnyMethod()
             .AllowAnyHeader()
             .AllowCredentials());
@@ -111,7 +111,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors("AllowAll");
+app.UseCors("AllowFrontend");
 
 app.UseHttpsRedirection();
 
