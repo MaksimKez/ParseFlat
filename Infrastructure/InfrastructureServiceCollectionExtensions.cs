@@ -4,11 +4,12 @@ using Application.Abstractions.JWT;
 using Application.Abstractions.Security;
 using Application.Abstractions.UserService;
 using Application.Dtos.Settings;
-using Infrastructure.Clients;
 using Infrastructure.Clients.Interfaces;
 using Infrastructure.Email;
 using Infrastructure.JWT;
 using Infrastructure.Security;
+using UserServiceClient = Infrastructure.UserServiceClient;
+using Infrastructure.UserServiceClient.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Polly;
@@ -51,7 +52,7 @@ public static class InfrastructureServiceCollectionExtensions
             client.Timeout = TimeSpan.FromSeconds(settings.TimeoutSeconds);
         });
         
-        services.AddHttpClient<UserServiceClient>((serviceProvider, client) =>
+        services.AddHttpClient<UserServiceClient.UserServiceClient>((serviceProvider, client) =>
         {
             var settings = serviceProvider.GetRequiredService<IOptions<UserProfileClientSettings>>().Value;
             client.BaseAddress = new Uri(settings.BaseUrl);
@@ -89,7 +90,7 @@ public static class InfrastructureServiceCollectionExtensions
                 .Build();
         });
 
-        services.AddScoped<IUserServiceClient, UserServiceClient>();
+        services.AddScoped<IUserServiceClient, UserServiceClient.UserServiceClient>();
         services.AddScoped<INotificationServiceClient, NotificationServiceClient>();
         
         services.AddScoped<IAuthHelper, AuthHelper.AuthHelper>();
