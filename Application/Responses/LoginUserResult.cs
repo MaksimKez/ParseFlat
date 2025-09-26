@@ -1,15 +1,10 @@
-using Domain.Entities;
-
 namespace Application.Responses;
 
-public class LoginUserResult : IResult
-{
-    public bool IsSuccess { get; init; }
-    public string? ErrorMessage { get; init; }
+public class LoginUserResult : Result
+{ 
     public string UserEmail { get; init; }
-
-    public string RefreshToken { get; set; }
-    public string AccessToken { get; set; }
+    public string RefreshToken { get; private init; }
+    public string AccessToken { get; private init; }
 
     public static LoginUserResult Success(string email, string refreshToken, string accessToken)
     {
@@ -23,5 +18,5 @@ public class LoginUserResult : IResult
         };
     }
     
-    public static LoginUserResult Failure(string error) => new LoginUserResult { IsSuccess = false, ErrorMessage = error };
+    public new static LoginUserResult Failure(string error) => new() { IsSuccess = false, ErrorMessage = error };
 }

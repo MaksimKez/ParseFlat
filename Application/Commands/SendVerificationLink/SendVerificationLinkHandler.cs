@@ -6,8 +6,8 @@ using MediatR;
 namespace Application.Commands.SendVerificationLink;
 
 public class SendVerificationLinkHandler(IVerificationService service)
-    : IRequestHandler<SendVerificationLinkCommand, SendVerificationLinkResult>
+    : IRequestHandler<SendVerificationLinkCommand, Result>
 {
-    public Task<SendVerificationLinkResult> Handle(SendVerificationLinkCommand request, CancellationToken cancellationToken)
+    public Task<Result> Handle(SendVerificationLinkCommand request, CancellationToken cancellationToken)
         => service.SendVerificationLinkAsync(request.Name, request.IsEmailVerification, cancellationToken);
 }

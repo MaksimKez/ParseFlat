@@ -3,4 +3,4 @@ using Application.Responses;
 
 namespace Application.Commands.SendVerificationLink;
 
-public record SendVerificationLinkCommand(string Name, bool IsEmailVerification) : ITransactionalCommand<SendVerificationLinkResult>;
+public record SendVerificationLinkCommand(string Name, bool IsEmailVerification) : ITransactionalCommand<Result>;

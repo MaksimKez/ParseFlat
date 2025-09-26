@@ -4,4 +4,4 @@ using MediatR;
 
 namespace Application.Commands.VerifyEmail;
 
-public record VerifyEmailCommand(string Token) : ITransactionalCommand<VerifyEmailResult>;
+public record VerifyEmailCommand(string Token) : ITransactionalCommand<Result>;

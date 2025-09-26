@@ -1,15 +1,9 @@
 namespace Application.Responses;
 
-public class AuthHelperResult : IResult
+public class AuthHelperResult : Result
 {
-    public bool IsSuccess { get; init; }
-    public string? ErrorMessage { get; init; }
+    public string? Value { get; private init; }
     
-    /// <summary>
-    /// <param name="value">Can be either email or token</param>
-    /// </summary>
-    public string? Value { get; init; }
-    
-    public static AuthHelperResult Success(string value) => new AuthHelperResult { IsSuccess = true, Value = value };
-    public static AuthHelperResult Failure(string errorMessage) => new AuthHelperResult { IsSuccess = false, ErrorMessage = errorMessage };
+    public static AuthHelperResult Success(string value) => new() { IsSuccess = true, Value = value };
+    public new static AuthHelperResult Failure(string errorMessage) => new() { IsSuccess = false, ErrorMessage = errorMessage };
 }
