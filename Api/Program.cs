@@ -25,14 +25,14 @@ builder.Services.AddApplication();
 
 builder.Services.AddScoped<IAuthControllerHelper, AuthControllerHelper>();
 
-builder.Services.AddCors(c =>
+/*builder.Services.AddCors(c =>
 {
     c.AddPolicy("AllowFrontend", policy =>
-        policy.WithOrigins("http://localhost:3000")
+        policy.WithOrigins("http://someurl")
             .AllowAnyMethod()
             .AllowAnyHeader()
             .AllowCredentials());
-});
+});*/
 
 builder.Services.AddEndpointsApiExplorer();
 
