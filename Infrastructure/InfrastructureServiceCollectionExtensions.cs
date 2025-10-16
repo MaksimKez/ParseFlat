@@ -4,9 +4,11 @@ using Application.Abstractions.JWT;
 using Application.Abstractions.Security;
 using Application.Abstractions.UserService;
 using Application.Dtos.Settings;
+using Infrastructure.Clients.Interfaces;
 using Infrastructure.Email;
 using Infrastructure.JWT;
 using Infrastructure.Security;
+using UserServiceClient = Infrastructure.UserServiceClient;
 using Infrastructure.UserServiceClient.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -15,10 +17,11 @@ using Polly.CircuitBreaker;
 using Polly.Retry;
 using Polly.Timeout;
 using Refit;
+using NotificationServiceClient = Infrastructure.Clients.NotificationServiceClient;
 
 namespace Infrastructure;
 
-public static class InfrastructureDependencyInjection
+public static class InfrastructureServiceCollectionExtensions
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services)
     {
@@ -33,7 +36,22 @@ public static class InfrastructureDependencyInjection
                 var settings = serviceProvider.GetRequiredService<IOptions<UserProfileClientSettings>>().Value;
                 client.BaseAddress = new Uri(settings.BaseUrl);
             });
+        
+        services.AddRefitClient<INotificationServiceApi>()
+            .ConfigureHttpClient((serviceProvider, client) =>
+            {
+                var settings = serviceProvider.GetRequiredService<IOptions<NotificationClientSettings>>().Value;
+                client.BaseAddress = new Uri(settings.BaseUrl);
+            });
 
+
+        services.AddHttpClient<NotificationServiceClient>((serviceProvider, client) =>
+        {
+            var settings = serviceProvider.GetRequiredService<IOptions<NotificationClientSettings>>().Value;
+            client.BaseAddress = new Uri(settings.BaseUrl);
+            client.Timeout = TimeSpan.FromSeconds(settings.TimeoutSeconds);
+        });
+        
         services.AddHttpClient<UserServiceClient.UserServiceClient>((serviceProvider, client) =>
         {
             var settings = serviceProvider.GetRequiredService<IOptions<UserProfileClientSettings>>().Value;
@@ -73,9 +91,10 @@ public static class InfrastructureDependencyInjection
         });
 
         services.AddScoped<IUserServiceClient, UserServiceClient.UserServiceClient>();
+        services.AddScoped<INotificationServiceClient, NotificationServiceClient>();
         
         services.AddScoped<IAuthHelper, AuthHelper.AuthHelper>();
-        services.AddScoped<IEmailService, EmailService>();
+        services.AddScoped<INotificationServiceClient, NotificationServiceClient>();
         services.AddScoped<IEmailVerifier, EmailVerifier>();
         services.AddScoped<IJwtGenerator, JwtGenerator>();
         services.AddScoped<IPasswordHasher, PasswordHasher>();

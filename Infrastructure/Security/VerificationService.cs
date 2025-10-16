@@ -1,6 +1,7 @@
 using Application.Abstractions.EmailService;
 using Application.Abstractions.Security;
 using Application.Abstractions.UserService;
+using Application.Dtos;
 using Application.Responses;
 using Domain.Abstractions;
 using Domain.Entities;
@@ -11,28 +12,28 @@ namespace Infrastructure.Security;
 public class VerificationService(
     IUnitOfWork unitOfWork,
     ITokenGenerator tokenGenerator,
-    IEmailService emailService,
+    INotificationServiceClient notificationServiceClient,
     IUserServiceClient userServiceClient,
     ILogger<VerificationService> logger)
     : IVerificationService
 {
 
     private const int emailVerificationTokeHours = 24; 
-    public async Task<SendVerificationLinkResult> SendVerificationLinkAsync(string name, bool isEmailVerification,
+    public async Task<Result> SendVerificationLinkAsync(string name, bool isEmailVerification,
                                                         CancellationToken cancellationToken)
     {
         var user = await unitOfWork.Users.FindByNameAsync(name, cancellationToken);
         if (user == null)
         {
             logger.LogWarning("User with name {Name} not found", name);
-            return SendVerificationLinkResult.Failure("User not found");
+            return Result.Failure("User not found");
         }
 
         var result = await userServiceClient.FindByIdAsync(user.Id, cancellationToken);
         if (result.User is null)
         {
             logger.LogWarning("User with name {Name} not found", name);
-            return SendVerificationLinkResult.Failure(result.ErrorMessage!);
+            return Result.Failure(result.ErrorMessage!);
         }
         
         var token = tokenGenerator.GenerateToken();
@@ -46,16 +47,21 @@ public class VerificationService(
             await CreatePasswordVerificationTokenAsync(user.Id, token, cancellationToken);
         }
 
-        var emailResult = await emailService.SendEmailAsync(result.User.Email, user.Name, token, cancellationToken);
+        var emailResult = await notificationServiceClient.SendEmailAsync(new EmailCodeDto
+        {
+            ToEmail = result.User.Email,
+            ToName = user.Name,
+            Token = token
+        }, cancellationToken);
 
         if (!emailResult.IsSuccess)
         {
             logger.LogError("Failed to send verification name to {Email}", result.User.Email);
-            return SendVerificationLinkResult.Failure("Failed to send verification name");
+            return Result.Failure("Failed to send verification name");
         }
 
         logger.LogInformation("Verification name sent to {Email}", result.User.Email);
-        return SendVerificationLinkResult.Success();
+        return Result.Success();
     }
 
     private async Task CreateEmailVerificationTokenAsync(Guid userId, string token, CancellationToken cancellationToken)
