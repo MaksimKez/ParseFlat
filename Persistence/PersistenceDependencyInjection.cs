@@ -12,22 +12,15 @@ public static class PersistenceDependencyInjection
 {
     public static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("DefaultConnection");
-        
-        if (string.IsNullOrWhiteSpace(connectionString))
-        {
-            connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection") 
-                               ?? Environment.GetEnvironmentVariable("POSTGRESQLCONNSTR_DefaultConnection");
-        }
+        var connectionString = Environment.GetEnvironmentVariable("POSTGRESQLCONNSTR_DefaultConnection");
 
-        if (string.IsNullOrEmpty(connectionString))
-        {
-            throw new InvalidOperationException("Connection string not found");
-        }
-        
+        if (string.IsNullOrWhiteSpace(connectionString))
+            throw new InvalidOperationException("Connection string not found in environment variables.");
+
+        Console.WriteLine("Using connection string: " + connectionString);
+
         services.AddDbContext<AuthDbContext>(options =>
             options.UseNpgsql(connectionString));
-
         
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<ITokenRepository<RefreshToken>, TokenRepository<RefreshToken>>();
