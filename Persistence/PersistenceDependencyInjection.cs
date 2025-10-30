@@ -2,7 +2,6 @@ using Domain.Abstractions;
 using Domain.Abstractions.Repositories;
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Persistence.Repositories;
 
@@ -10,9 +9,9 @@ namespace Persistence;
 
 public static class PersistenceDependencyInjection
 {
-    public static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddPersistence(this IServiceCollection services, string connStr)
     {
-        var connectionString = Environment.GetEnvironmentVariable("POSTGRESQLCONNSTR_DefaultConnection");
+        var connectionString = Environment.GetEnvironmentVariable("POSTGRESQLCONNSTR_DefaultConnection") ?? connStr;
 
         if (string.IsNullOrWhiteSpace(connectionString))
             throw new InvalidOperationException("Connection string not found in environment variables.");

@@ -18,9 +18,10 @@ builder.Services.Configure<AuthOptions>(
     builder.Configuration.GetSection(AuthOptions.SectionName));
 builder.Services.Configure<UserProfileClientSettings>(builder.Configuration.GetSection(UserProfileClientSettings.SectionName));
 builder.Services.Configure<NotificationClientSettings>(builder.Configuration.GetSection(NotificationClientSettings.SectionName));
+var connStr = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddInfrastructure();
-builder.Services.AddPersistence(builder.Configuration);
+builder.Services.AddPersistence(connStr);
 builder.Services.AddApplication();
 
 builder.Services.AddScoped<IAuthControllerHelper, AuthControllerHelper>();
