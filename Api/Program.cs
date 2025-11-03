@@ -9,6 +9,7 @@ using Microsoft.OpenApi.Models;
 using Persistence;
 using Api.Helpers;
 using Api.Helpers.Interfaces;
+using Azure.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,7 +21,10 @@ builder.Services.Configure<UserProfileClientSettings>(builder.Configuration.GetS
 builder.Services.Configure<NotificationClientSettings>(builder.Configuration.GetSection(NotificationClientSettings.SectionName));
 var connStr = builder.Configuration.GetConnectionString("DefaultConnection");
 
-builder.Services.AddInfrastructure();
+var keyVaultUrl = new Uri($"https://{builder.Configuration["KeyVaultName"]}.vault.azure.net/");
+builder.Configuration.AddAzureKeyVault(keyVaultUrl, new DefaultAzureCredential(), new KeyVaultManager("secret"));
+
+builder.Services.AddInfrastructure();   
 builder.Services.AddPersistence(connStr);
 builder.Services.AddApplication();
 
@@ -117,6 +121,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.MapGet("/health", () => Results.Ok("Service is healthy"));
+app.MapGet("/health", (IConfiguration config) => Results.Ok(config.GetSection("secret--SuperSecret1234")));
 
 app.Run();
