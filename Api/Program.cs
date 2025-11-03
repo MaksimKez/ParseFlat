@@ -22,7 +22,8 @@ builder.Services.Configure<UserProfileClientSettings>(builder.Configuration.GetS
 builder.Services.Configure<NotificationClientSettings>(builder.Configuration.GetSection(NotificationClientSettings.SectionName));
 var connStr = builder.Configuration.GetConnectionString("DefaultConnection");
 
-var keyVaultUrl = new Uri($"https://{builder.Configuration["KeyVaultName"]}.vault.azure.net/");
+var keyVaultName = builder.Configuration["KeyVault:Name"] ?? throw new InvalidOperationException("KeyVault:Name is not configured in appsettings.json");
+var keyVaultUrl = new Uri($"https://{keyVaultName}.vault.azure.net/");
 builder.Configuration.AddAzureKeyVault(keyVaultUrl, new DefaultAzureCredential(), new KeyVaultManager("secret"));
 
 builder.Services.AddInfrastructure();   
