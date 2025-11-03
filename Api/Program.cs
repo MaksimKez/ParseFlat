@@ -10,6 +10,7 @@ using Persistence;
 using Api.Helpers;
 using Api.Helpers.Interfaces;
 using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -121,6 +122,31 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.MapGet("/health", (IConfiguration config) => Results.Ok(config.GetSection("secret--SuperSecret1234")));
+app.MapGet("/health", async (IConfiguration configuration, ILogger<Program> logger) =>
+{
+    try
+    {
+        var keyVaultName = configuration["KeyVault:Name"];
+        if (string.IsNullOrEmpty(keyVaultName))
+        {
+            throw new InvalidOperationException("KeyVault:Name is not configured");
+        }
+        
+        var keyVaultUri = new Uri($"https://{keyVaultName}.vault.azure.net/");
+        var client = new SecretClient(keyVaultUri, new DefaultAzureCredential());
+        var secret = await client.GetSecretAsync("secret--superSecret1234");
+        
+        return Results.Ok(new 
+        { 
+            Status = "Healthy",
+            Secret = secret.Value.Value
+        });
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Error retrieving secret from Key Vault");
+        return Results.Problem("Failed to retrieve secret from Key Vault", statusCode: 500);
+    }
+}).WithName("HealthCheck");
 
 app.Run();
